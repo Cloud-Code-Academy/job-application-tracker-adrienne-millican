@@ -7,39 +7,44 @@
  **/
 public without sharing class Util_Insert {
   public static String messageStr { get; private set; }
+  public static final String CLSS_NAME = 'Util_Insert';
 
   /**
    * @description static method for inserting a list of sObjects
    * @author admillican08@gmail.com | 09-11-2024
    * @param objName
-   * @param objsToUpd
+   * @param objsToUpdLst
    * @param callingMethod
    * @return String
    **/
   public static String insertList(
     String objName,
-    List<sObject> objsToUpd,
+    List<sObject> objsToUpdLst,
     String callingMethod
   ) {
-    String methodName = 'insertList method of Util_Insert class';
+    final String MTHD_NAME = 'insertList method';
     String objId;
-    if (objsToUpd.size() > 0) {
+    if (objsToUpdLst.size() > 0) {
       try {
         // Insert the list
-        insert as SYSTEM objsToUpd;
+        insert as SYSTEM objsToUpdLst;
         messageStr =
           '**Inserted ' +
-          objsToUpd.size() +
+          objsToUpdLst.size() +
           ' record(s) of ' +
           objName +
           ' type in ' +
-          methodName +
+          MTHD_NAME +
+          ', ' +
+          CLSS_NAME +
           ' called by ' +
           callingMethod;
       } catch (DmlException dmlEx) {
         String insDetails =
           'Method: ' +
-          methodName +
+          MTHD_NAME +
+          ', ' +
+          CLSS_NAME +
           '; Cause: ' +
           dmlEx.getCause() +
           '; Line Number: ' +
@@ -51,11 +56,11 @@ public without sharing class Util_Insert {
           '; Type Name: ' +
           dmlEx.getTypeName();
         //Publish a platform event that is published immediately with the exception information in case the exception is rolled back
-        objId = Test.isRunningTest() ? 'test' : objsToUpd[0].id;
+        objId = Test.isRunningTest() ? 'test' : objsToUpdLst[0].id;
         Util_ExceptionUtil.publishException(
           objName,
-          methodName,
-          callingMethod,
+          MTHD_NAME + ' called by ' + callingMethod,
+          CLSS_NAME,
           objId,
           insDetails
         );
@@ -66,7 +71,9 @@ public without sharing class Util_Insert {
         '**No records of ' +
         objName +
         ' to insert in ' +
-        methodName +
+        MTHD_NAME +
+        ', ' +
+        CLSS_NAME +
         ' called by ' +
         callingMethod;
     }
@@ -87,9 +94,13 @@ public without sharing class Util_Insert {
     String callingMethod
   ) {
     List<sObject> objLst = new List<sObject>{ objRecd };
-    String methodName = 'insertRecord method of Util_Insert class';
-    String objId;
-    callingMethod = methodName + ' called by ' + callingMethod;
+    final String MTHD_NAME = 'insertRecord method';
+    callingMethod =
+      MTHD_NAME +
+      ', ' +
+      CLSS_NAME +
+      ' called by ' +
+      callingMethod;
     return Util_Insert.insertList(objName, objLst, callingMethod);
   }
 
@@ -103,7 +114,7 @@ public without sharing class Util_Insert {
    * @param lstofSobjectLsts
    **/
   public static void insertListInvocable(List<List<sObject>> lstofSobjectLsts) {
-    String methodName = 'insertListInvocable method of Util_Insert class';
+    final String MTHD_NAME = 'insertListInvocable method';
     List<sObject> objLst = new List<sObject>();
     for (List<sObject> invLst : lstofSobjectLsts) {
       if (invLst.size() > 0) {
@@ -112,6 +123,10 @@ public without sharing class Util_Insert {
         }
       }
     }
-    messageStr = Util_Insert.insertList('<objName>', objLst, methodName);
+    messageStr = Util_Insert.insertList(
+      '<objName>',
+      objLst,
+      MTHD_NAME + ', ' + CLSS_NAME
+    );
   }
 }

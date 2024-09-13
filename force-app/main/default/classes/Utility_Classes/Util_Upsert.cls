@@ -6,40 +6,45 @@
  * @last modified by  : admillican08@gmail.com
  **/
 public without sharing class Util_Upsert {
+  public static final String CLSS_NAME = 'Util_Upsert';
   public static String messageStr { get; private set; }
 
   /**
    * @description
    * @author admillican08@gmail.com | 09-11-2024
    * @param objName
-   * @param objsToUpd
+   * @param objsToUpdLst
    * @param callingMethod
    * @return String
    **/
   public static String upsertList(
     String objName,
-    List<sObject> objsToUpd,
+    List<sObject> objsToUpdLst,
     String callingMethod
   ) {
-    String methodName = 'upsertList method of Util_Upsert class';
+    final String MTHD_NAME = 'upsertList method';
     String objId;
-    if (objsToUpd.size() > 0) {
+    if (objsToUpdLst.size() > 0) {
       try {
         // Upsert the list
-        upsert as SYSTEM objsToUpd;
+        upsert as SYSTEM objsToUpdLst;
         messageStr =
           '**Upserted ' +
-          objsToUpd.size() +
+          objsToUpdLst.size() +
           ' record(s) of ' +
           objName +
           ' type in ' +
-          methodName +
+          MTHD_NAME +
+          ', ' +
+          CLSS_NAME +
           ' called by ' +
           callingMethod;
       } catch (DmlException dmlEx) {
         String insDetails =
           'Method: ' +
-          methodName +
+          MTHD_NAME +
+          ', ' +
+          CLSS_NAME +
           '; Cause: ' +
           dmlEx.getCause() +
           '; Line Number: ' +
@@ -51,11 +56,11 @@ public without sharing class Util_Upsert {
           '; Type Name: ' +
           dmlEx.getTypeName();
         //Publish a platform event that is published immediately with the exception information in case the exception is rolled back
-        objId = Test.isRunningTest() ? 'test' : objsToUpd[0].id;
+        objId = Test.isRunningTest() ? 'test' : objsToUpdLst[0].id;
         Util_ExceptionUtil.publishException(
           objName,
-          methodName,
-          callingMethod,
+          MTHD_NAME + ' called by ' + callingMethod,
+          CLSS_NAME,
           objId,
           insDetails
         );
@@ -66,7 +71,9 @@ public without sharing class Util_Upsert {
         '**No records of ' +
         objName +
         ' to upsert in ' +
-        methodName +
+        MTHD_NAME +
+        ', ' +
+        CLSS_NAME +
         ' called by ' +
         callingMethod;
     }
@@ -86,9 +93,13 @@ public without sharing class Util_Upsert {
     String callingMethod
   ) {
     List<sObject> objLst = new List<sObject>{ objRecd };
-    String methodName = 'upsertRecord method of Util_Upsert class';
-    String objId;
-    callingMethod = methodName + ' called by ' + callingMethod;
+    final String MTHD_NAME = 'upsertRecord method';
+    callingMethod =
+      MTHD_NAME +
+      ', ' +
+      CLSS_NAME +
+      ' called by ' +
+      callingMethod;
     return Util_Upsert.upsertList(objName, objLst, callingMethod);
   }
 
@@ -102,7 +113,7 @@ public without sharing class Util_Upsert {
    * @param lstofSobjectLsts
    **/
   public static void upsertListInvocable(List<List<sObject>> lstofSobjectLsts) {
-    String methodName = 'upsertListInvocable method of Util_Upsert class';
+    final String MTHD_NAME = 'upsertListInvocable method';
     List<sObject> objLst = new List<sObject>();
     for (List<sObject> invLst : lstofSobjectLsts) {
       if (invLst.size() > 0) {
@@ -111,6 +122,10 @@ public without sharing class Util_Upsert {
         }
       }
     }
-    messageStr = Util_Upsert.upsertList('<objName>', objLst, methodName);
+    messageStr = Util_Upsert.upsertList(
+      '<objName>',
+      objLst,
+      MTHD_NAME + ', ' + CLSS_NAME
+    );
   }
 }
