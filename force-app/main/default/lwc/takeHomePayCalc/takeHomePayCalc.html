@@ -1,0 +1,164 @@
+<!--
+  @description       : 
+  @author            : admillican08@gmail.com
+  @group             : 
+  @last modified on  : 09-15-2024
+  @last modified by  : admillican08@gmail.com
+-->
+<template>
+    <lightning-card>
+        <h1 slot="title" class="slds-text-heading_large">Take Home Pay Calculator</h1>
+  <!--Answer Relevant Questions-->
+    <div class="slds-p-horizontal_small">
+        <lightning-combobox
+        name="salaryType" 
+        label="Salary Type" 
+        value=""
+        placeholder="Select Salary Type"
+        options={options} 
+        onchange={handleChange}
+        required>
+    </lightning-combobox>
+
+        <lightning-combobox
+        name="payFrequency" 
+        label="Pay Frequency"
+        value=""
+        placeholder="Select Pay Frequency"
+        options={options}
+        onchange={handleChange}
+        required>
+        </lightning-combobox>
+
+        <lightning-combobox name="filingStatus"
+        label="Federal Tax Filing Status"
+        value="" 
+        placeholder="Select Your Federal Tax Filing Status"
+        options={options} 
+        onchange={handleChange} 
+        required>
+        </lightning-combobox>
+
+<!--Input Salary-->
+        <lightning-input
+        type="number" 
+        name="salaryAmount"
+        label="Salary Amount"   
+        value={salAmt}
+        formatter="currency"
+        step="0.01"
+        placeholder="Enter the Salary Amount"
+        onchange={handleChange}
+        required>
+        </lightning-input>
+
+        <lightning-input 
+        type="number" 
+        name="addtlDeductAmt" 
+        label="Additional Deduction Amount" 
+        value={addtlDeductAmt} 
+        formatter="currency" 
+        step="0.01"
+        placeholder="Enter Any Additional Deduction Amount" 
+        onchange={handleChange}>
+        </lightning-input>
+
+        <lightning-input
+        type="number"
+        name="addtlWithholdingAmt"
+         label="Additional Witholding Amount"
+        value={addtlWithholdAmt}
+        formatter="currency"
+        step="0.01"
+        placeholder="Enter Any Additional Withholding Amount"
+        onchange={handleChange}>
+        </lightning-input>
+    </div>
+    <!--Make Selection Re: Exemptions-->
+    <div class="slds-m-left_small"> 
+<fieldset class="slds-form-element">
+    <div class="slds-m-top_medium">
+    <legend class="slds-form-element__legend slds-form-element__label">
+        <abbr class="slds-required" title="required">*</abbr><span class="slds-text-heading_small">Are You Exempt from Federal Income Tax?</span>
+    </legend>
+    <div class="slds-form-element__control">
+        <span class="slds-radio">
+            <input type="radio" id="radioYes-01" value="radioYes-01" name="required" aria-describedby="required_01" checked="" />
+            <label class="slds-radio__label" for="radioYes-01">
+                <span class="slds-radio_faux"></span>
+                <span class="slds-form-element__label">Yes</span>
+            </label>
+        </span>
+        <span class="slds-radio">
+            <input type="radio" id="radioNo-01" value="radioNo-01" name="required" aria-describedby="required_01" />
+            <label class="slds-radio__label" for="radioNo-01">
+                <span class="slds-radio_faux"></span>
+                <span class="slds-form-element__label">No</span>
+            </label>
+        </span>
+    </div>
+    </div>
+</fieldset>
+<fieldset class="slds-form-element">
+    <div class="slds-m-top_medium">
+        <legend class="slds-form-element__legend slds-form-element__label">
+            <abbr class="slds-required" title="required">*</abbr><span class="slds-text-heading_small">Are You Exempt from Medicare Tax?</span>
+        </legend>
+        <div class="slds-form-element__control">
+            <span class="slds-radio">
+                <input type="radio" id="radioYes-02" value="radioYes-02" name="required" aria-describedby="required_02"
+                    checked="" />
+                <label class="slds-radio__label" for="radioYes-02">
+                    <span class="slds-radio_faux"></span>
+                    <span class="slds-form-element__label">Yes</span>
+                </label>
+            </span>
+            <span class="slds-radio">
+                <input type="radio" id="radioNo-02" value="radioNo-02" name="required" aria-describedby="required_02" />
+                <label class="slds-radio__label" for="radioNo-02">
+                    <span class="slds-radio_faux"></span>
+                    <span class="slds-form-element__label">No</span>
+                </label>
+            </span>
+        </div>
+    </div>
+</fieldset>
+<fieldset class="slds-form-element">
+    <div class="slds-m-top_medium">
+        <legend class="slds-form-element__legend slds-form-element__label">
+            <abbr class="slds-required" title="required">*</abbr><span class="slds-text-heading_small">Are You Exempt from Social Security Tax?</span>
+        </legend>
+        <div class="slds-form-element__control">
+            <span class="slds-radio">
+                <input type="radio" id="radioYes-03" value="radioYes-03" name="required" aria-describedby="required_03"
+                    checked="" />
+                <label class="slds-radio__label" for="radioYes-03">
+                    <span class="slds-radio_faux"></span>
+                    <span class="slds-form-element__label">Yes</span>
+                </label>
+            </span>
+            <span class="slds-radio">
+                <input type="radio" id="radioNo-03" value="radioNo-03" name="required" aria-describedby="required_03" />
+                <label class="slds-radio__label" for="radioNo-03">
+                    <span class="slds-radio_faux"></span>
+                    <span class="slds-form-element__label">No</span>
+                </label>
+            </span>
+        </div>
+    </div>
+</fieldset>
+</div>
+    <!--Process-->
+    <div class="slds-m-top_medium" >
+    <lightning-button class="slds-m-left_small"  variant="brand" label="Calculate" title="Calculate" 
+        onclick={handleClick}></lightning-button>
+    </div>
+   
+    <!--Display results-->
+    <div slot="footer" class="resultText" >
+   <p class="slds-text-align_left">Take Home Pay Amount: <span class="slds-text-color_success"><lightning-formatted-number value={takeHomePay} format-style="currency" currency-code="USD"></lightning-formatted-number></span></p>
+   
+
+</div>
+    </lightning-card>
+</template>

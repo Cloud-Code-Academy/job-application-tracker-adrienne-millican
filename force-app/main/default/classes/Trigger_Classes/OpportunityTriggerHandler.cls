@@ -1,17 +1,15 @@
 /**
- * @description       :
+ * @description       : 
  * @author            : admillican08@gmail.com
- * @group             :
+ * @group             : 
  * @last modified on  : 09-13-2024
  * @last modified by  : admillican08@gmail.com
- **/
-
-public without sharing class JobApplicationTriggerHandler extends TriggerHandler implements ITriggerHandler {
-  public static final String OBJ = 'Job_Application__c';
-
-  public JobApplicationTriggerHandler(String objName) {
-    super(objName);
-  }
+**/
+public with sharing class OpportunityTriggerHHandler extends TriggerHandler implements ItriggerHandler{
+    public static final String OBJ = 'Opportunity';
+    public OpportunityTriggerHandler(String objName) {
+        super(objName);
+    }
 
   public void beforeInsert(List<sObject> newItemLst) {
   }

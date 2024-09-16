@@ -1,13 +1,13 @@
 /**
- * @description       :
- * @author            : Adrienne D. Millican <adrienne.millican@swisslog.com>
- * @group             :
- * @last modified on  : 09-10-2024
+ * @description       : Based on the desgin by Jigar Shah and Amit Chaudhary
+ * @author            : admillican08@gmail.com
+ * @group             : 
+ * @last modified on  : 09-13-2024
  * @last modified by  : admillican08@gmail.com
- **/
+**/
 
 public with sharing class TriggerDispatcher {
-  public static void Run(ITriggerHandler handler) {
+  public static void run(ITriggerHandler handler) {
     //System.debug('*** Run method of TriggerDispatcher is executing ***');
 
     // Detect the current trigger context and fire relevant methods on

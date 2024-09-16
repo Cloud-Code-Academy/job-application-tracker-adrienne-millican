@@ -1,8 +1,11 @@
 /**
- * @File Name          : ITriggerHandler.apxc
- * @Description        :
- * @Author             : Adrienne D. Millican, adapted from code by Jigar Shah and Jitendra Zaa
- **/
+ * @description       : Based on the desgin by Jigar Shah and Amit Chaudhary
+ * @author            : admillican08@gmail.com
+ * @group             : 
+ * @last modified on  : 09-13-2024
+ * @last modified by  : admillican08@gmail.com
+**/
+
 public interface ITriggerHandler {
   void beforeInsert(List<SObject> newItems);
 
