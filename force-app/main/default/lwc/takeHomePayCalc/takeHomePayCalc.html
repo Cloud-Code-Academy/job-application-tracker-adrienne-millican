@@ -2,7 +2,7 @@
   @description       : 
   @author            : admillican08@gmail.com
   @group             : 
-  @last modified on  : 09-16-2024
+  @last modified on  : 09-17-2024
   @last modified by  : admillican08@gmail.com
 -->
 <template>
@@ -106,17 +106,21 @@
     </lightning-radio-group>
   </div>
 </div>
+</lightning-card>
+
     <!--Process-->
-    <div class="slds-m-top_small" >
+  
+<template lwc:if={showCalculate}>
+    <div class="slds-m-top_medium" >
     <lightning-button class="slds-m-left_small"  variant="brand" label="Calculate" title="Calculate" 
         onclick={handleClick}></lightning-button>
     </div>
    
     <!--Display results-->
+    <div class="slds-m-top_medium">
     <div slot="footer" class="takeHomeText" >
    <p class="slds-text-align_left">Take Home Pay Amount: <span class="slds-text-color_success"><lightning-formatted-number value={takeHomePay} format-style="currency" currency-code="USD"></lightning-formatted-number></span></p>
-   
-
 </div>
-    </lightning-card>
+</div>
+</template>
 </template>

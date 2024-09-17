@@ -2,7 +2,7 @@
  * @description       :
  * @author            : admillican08@gmail.com
  * @group             :
- * @last modified on  : 09-16-2024
+ * @last modified on  : 09-17-2024
  * @last modified by  : admillican08@gmail.com
  **/
 @IsTest
@@ -11,34 +11,20 @@ public class TaxMetadataControllerTest {
   @IsTest
   public static void testGetTaxRatePercentageSingle() {
     // Test for single filer with salary within the first bracket
-    Decimal taxRate = TaxMetadataController.getTaxRatePercentage(
-      'Single_Filing',
-      45000.00
-    );
-    Assert.equals(
-      10.00,
-      taxRate,
-      'The tax rate should be 10% for this salary.'
-    );
+    Decimal taxRate = TaxMetadataController.getTaxRatePercentage('S', 45000.00);
+    Assert.equals(12.00, taxRate, 'The tax rate should be 12 for this salary.');
 
     // Test for single filer with salary within the second bracket
-    taxRate = TaxMetadataController.getTaxRatePercentage(
-      'Single_Filing',
-      75000.00
-    );
-    Assert.equals(
-      20.00,
-      taxRate,
-      'The tax rate should be 20% for this salary.'
-    );
+    taxRate = TaxMetadataController.getTaxRatePercentage('S', 175000.00);
+    Assert.equals(24.00, taxRate, 'The tax rate should be 24 for this salary.');
   }
 
   // Test method to cover the getTaxRatePercentage method for Married Filing
   @IsTest
-  public static void testGetTaxRatePercentageMarried() {
+  public static void testGetTaxRatePercentageMFJ() {
     // Test for married filer with salary within the first bracket
     Decimal taxRate = TaxMetadataController.getTaxRatePercentage(
-      'Married_Filing',
+      'MFJ',
       60000.00
     );
     Assert.equals(
@@ -48,10 +34,7 @@ public class TaxMetadataControllerTest {
     );
 
     // Test for married filer with salary within the second bracket
-    taxRate = TaxMetadataController.getTaxRatePercentage(
-      'Married_Filing',
-      120000.00
-    );
+    taxRate = TaxMetadataController.getTaxRatePercentage('MFJ', 120000.00);
     Assert.equals(
       25.00,
       taxRate,

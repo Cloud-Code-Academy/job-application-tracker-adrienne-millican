@@ -1,30 +1,46 @@
-import { LightningElement, api, wire } from 'lwc';
+import { LightningElement, api, wire, track } from 'lwc';
 import getTaxRatePercentage  from '@salesforce/apex/TaxMetadataController.getTaxRatePercentage';
 import getFederalRate  from '@salesforce/apex/FederalRatesMetadataController.getFederalRate';
 
 export default class takeHomePayCalc extends LightningElement {
     @api recordId;
     @api fieldName = 'Salary__cc';
-    salaryTypeVal = '';
-    payFrequencyVal = '';
-    filingStatusVal = '';
-    salAmt = 0.0;
+    salaryTypeVal = null;
+    payFrequencyVal = null;
+    filingStatusVal = null;
+    salAmt = null;
+    addtlDeductAmt = null;
+    addtlWithholdAmt = null;
     taxBr = 0.0;
     medicareRate = 0.0;
     socSecRate = 0.0;
-    error = '';
-    addtlDeductAmt = 0.0;
-    addtlWithholdAmt = 0.0;
+    rateType = null;
+    error = null;
+    rate = 0.0;
     currYr = 0;
-    
     takeHomePay = 0.00;
+    fedExemptValue = null;
+    medExemptValue = null;
+    socExemptValue = null;
+    @track showCalculate = false;
 
-    fedExemptValue = false;
-    medExemptValue = false;
-    socExemptValue = false;
+    federalRates = ['Medicare', 'Social Security'];
 
-    federalRates = [ { name: 'Medicare', rate: 0.0},
-                    { name: 'Social Security', rate: 0.0}];
+    
+    showButtonIfAllValuesPopulated(){
+    if (this.salaryTypeVal !== null &&
+        this.payFrequencyVal !== null &&
+        this.filingStatusVal !== null &&
+        this.salAmt !== null &&
+        this.fedExemptValue !== null &&
+        this.medExemptValue !== null &&
+        this.socExemptValue !== null) {
+            this.showCalculate = true; 
+         } else {
+            this.showCalculate = false;
+        }
+    
+    }
  
     get salaryOptions(){
         return [
@@ -62,6 +78,15 @@ export default class takeHomePayCalc extends LightningElement {
 
      getCurrentYear(){
         this.currYr = new Date().getFullYear();
+        console.log('**Current year: ' + this.currYr);
+    }
+
+    getSocialSecurityRate(){
+           console.log('**Social Security Rate: ' + this.socSecRate);
+    }
+
+      getMedicareRate(){
+            console.log('**Medicare Rate: ' + this.medicareRate);
     }
 
     @wire(getTaxRatePercentage, { filingStatusVal: '$filingStatusVal', salAmt: '$salAmt', currYr: '$currYr' }) taxBr 
@@ -70,30 +95,36 @@ export default class takeHomePayCalc extends LightningElement {
            this.taxBr = data;
        } else if (error) {
            this.error = error;
-           alert(error);
+           console.log('**Error from getTaxRatePercentage: ' + error);
     }
    }
 
-     @wire(getFederalRate, { rateType: '$rateType', currYr: '$currYr' }) federalRates
+     @wire(getFederalRate, { rateType: '$rateType', currYr: '$currYr' }) rate
     ({ error, data }) {
        if (data) {
            this.rate = data;
        } else if (error) {
            this.error = error;
-           alert(error);
+           console.log('**Error from getFederalRate: ' + error);
     }
    }
     
       handleSalaryTypeChange(event){
         this.salaryTypeVal = event.detail.value;
+        console.log('**salaryTypeVal: ' + this.salaryTypeVal);
+        this.showButtonIfAllValuesPopulated();
     }
 
      handlePayFreqChange(event){
         this.payFrequencyVal = event.detail.value;
+        console.log('**payFrequencyVal: ' + this.payFrequencyVal);
+        this.showButtonIfAllValuesPopulated();
     }
 
      handleFilingStatusChange(event){
         this.filingStatusVal = event.detail.value;
+        console.log('**filingStatusVal: ' + this.filingStatusVal);
+        this.showButtonIfAllValuesPopulated();
     }
 
     handleNumericChange(event){
@@ -101,29 +132,46 @@ export default class takeHomePayCalc extends LightningElement {
         let value = Number(event.target.value);
         if (inputName === 'salaryAmount'){
             this.salAmt = value;
+            console.log('**salAmt value ' + this.salAmt);
+            this.showButtonIfAllValuesPopulated();
         } else if (inputName === 'addtlDeductAmt'){
             this.addtlDeductAmt = value;
-        } else if (inputName === 'addtlWithholdAmt'){
+            this.showButtonIfAllValuesPopulated();
+             console.log('**addtlDeductAmt value ' + this.addtlDeductAmt);
+        } else if (inputName === 'addtlWithholdingAmt'){
             this.addtlWithholdAmt = value;
+             console.log('**addtlWithholdAmt value ' + this.addtlWithholdAmt);
+             this.showButtonIfAllValuesPopulated();
         } else {
+            console.log(value);
             alert('Error with input number');
         }
     }
 
     handleExemptFederalChange(event){
         this.fedExemptValue = event.target.value;
+        console.log('**fedExemptValue: ' + this.fedExemptValue);
+        this.showButtonIfAllValuesPopulated();
     }
 
     handleExemptMedicareChange(event){
         this.medExemptValue = event.target.value;
+         console.log('**medExemptValue: ' + this.medExemptValue);
+         this.showButtonIfAllValuesPopulated();
     }
+
 
     handleExemptSocChange(event){
         this.socExemptValue = event.target.value;
+         console.log('**socExemptValue: ' + this.socExemptValue);
+    this.showButtonIfAllValuesPopulated();
     }
 
     handleClick(event){
+        this.getCurrentYear();
+        this.getSocialSecurityRate();
+        this.getMedicareRate();
         alert('Tax bracket: ' + this.taxBr);
     }
-  
+
 }
