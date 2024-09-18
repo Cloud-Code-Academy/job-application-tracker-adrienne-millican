@@ -8,24 +8,24 @@
 <template>
     <lightning-card>
         <h1 slot="title" class="slds-text-heading_medium">Take Home Pay Calculator</h1>
-        <p class="subHeadText">(All Rates Used are for the Current Year)</p>
+        <p class="subHeadText">All Rates Used are for the Current Year: {currYr}</p>
    
   <!--Answer Relevant Questions-->
   <lightning-tabset>
     <lightning-tab label="Please Select Data">
     <div class="slds-m-left_small">
-        <div class="slds-m-top_medium">
-        <lightning-combobox
-        name="salaryType" 
-        label="Salary Type" 
+        <lightning-combobox class="slds-m-top_small"
+        name="howPaid" 
+        label="How Paid" 
         value={value}
-        placeholder="Select Salary Type"
-        options={salaryOptions} 
-        onchange={handleSalaryTypeChange}
+        placeholder="Select How you are Paid"
+        options={howPaidOptions} 
+        onchange={handleHowPaidChange}
         required>
     </lightning-combobox>
 
-        <lightning-combobox
+     <template lwc:if={showSalaried}>
+        <lightning-combobox class="slds-m-top_small"
         name="payFrequency" 
         label="Pay Frequency"
         value={value}
@@ -34,36 +34,59 @@
         onchange={handlePayFreqChange}
         required>
         </lightning-combobox>
-
-        <lightning-combobox 
-		name="filingStatus"
-        label="Federal Tax Filing Status"
-        value={value} 
-        placeholder="Select Your Federal Tax Filing Status"
-        options={filingStatusOptions} 
-        onchange={handleFilingStatusChange} 
-        required>
-        </lightning-combobox>
-        </div>
-        </div>
+    </template>
+    <template lwc:if={showSalaried}>
+        <lightning-input class="slds-m-top_small"
+         type="number" name="salaryAmount"
+          label="Salary Amount" 
+          value={salAmt}
+            formatter="currency" 
+            step="0.01"
+             placeholder="Enter the Salary Amount" 
+             onchange={handleNumericChange} 
+             required>
+        </lightning-input>
+    </template>
+        <template lwc:if={showLump}>
+            <lightning-input class="slds-m-top_small"
+             type="number" 
+             name="lumpSalaryAmount" 
+             label="Lump Salary Amount" 
+             value={salAmt}
+             formatter="currency" 
+             step="0.01"
+             placeholder="Enter the Lump Salary Amount"
+              onchange={handleNumericChange} 
+              required>
+            </lightning-input>
+        </template>
+    <template lwc:elseif={showHourly}>
+        <lightning-input class="slds-m-top_small"
+         type="number" 
+         name="hrsWorked" 
+         label="Hours Worked" 
+         value={hrsWkd}
+        placeholder="Enter the Hours Worked"
+         onchange={handleNumericChange} 
+         required>
+        </lightning-input>
+    </template>
+    </div>
 </lightning-tab>
 <!--Input Salary-->
-<lightning-tab label="Please Enter Data">
-        <div class="slds-m-left_small">
-            <div class="slds-m-top_medium">
-        <lightning-input
-        type="number" 
-        name="salaryAmount"
-        label="Salary Amount"   
-        value={salAmt}
-        formatter="currency"
-        step="0.01"
-        placeholder="Enter the Salary Amount"
-        onchange={handleNumericChange}
-        required>
-        </lightning-input>
 
-        <lightning-input 
+<lightning-tab label="Please Enter Data">
+    <div class="slds-m-left_small">
+<lightning-combobox class="slds-m-top_small" 
+    name="filingStatus" 
+    label="Federal Tax Filing Status" 
+    value={value}
+    placeholder="Select Your Federal Tax Filing Status" 
+    options={filingStatusOptions}
+    onchange={handleFilingStatusChange} 
+    required>
+</lightning-combobox>
+        <lightning-input class="slds-m-top_small"
         type="number" 
         name="addtlDeductAmt" 
         label="Additional Deduction Amount" 
@@ -74,7 +97,7 @@
         onchange={handleNumericChange}>
         </lightning-input>
 
-        <lightning-input
+        <lightning-input class="slds-m-top_small"
         type="number"
         name="addtlWithholdingAmt"
          label="Additional Witholding Amount"
@@ -85,13 +108,11 @@
         onchange={handleNumericChange}>
         </lightning-input>
     </div>
-    </div>
     </lightning-tab>
     <!--Make Selection Re: Exemptions-->
     <lightning-tab label="Please Select Correct Options">
     <div class="slds-m-left_small"> 
-    <div class="slds-m-top_medium">
-    <lightning-radio-group
+    <lightning-radio-group class="slds-m-top_small"
             name="federalExempt"
             label="Are You Exempt from Federal Income Tax?" 
             options={radioOptions}
@@ -99,7 +120,7 @@
             onchange={handleExemptFederalChange} 
             required>
     </lightning-radio-group>
-    <lightning-radio-group 
+    <lightning-radio-group class="slds-m-top_small"
         name="medicareExempt" 
         label="Are You Exempt from Medicare Tax?" 
         options={radioOptions}
@@ -107,7 +128,7 @@
         onchange={handleExemptMedicareChange} 
         required>
     </lightning-radio-group>
-    <lightning-radio-group
+    <lightning-radio-group class="slds-m-top_small"
         name="socialExempt" 
         label="Are You Exempt from Social Security Tax?" 
         options={radioOptions}
@@ -116,7 +137,6 @@
         required>
     </lightning-radio-group>
   </div>
-</div>
 </lightning-tab>
 </lightning-tabset>
 </lightning-card>
@@ -124,15 +144,17 @@
     <!--Process-->
   
 <template lwc:if={showCalculate}>
-    <div class="slds-m-top_medium" >
-    <lightning-button class="slds-m-left_small"  variant="brand" label="Calculate" title="Calculate" 
+    <div class="slds-m-top_small">
+    <div class="slds-m-left_small">
+    <lightning-button class="slds-m-top_small"  variant="brand" label="Calculate" title="Calculate" 
         onclick={handleClick}></lightning-button>
     </div>
    
     <!--Display results-->
-    <div class="slds-m-top_medium">
+    <div class="slds-text-align_left">
     <div slot="footer" class="takeHomeText" >
-   <p class="slds-text-align_left">Take Home Pay Amount: <span class="slds-text-color_success"><lightning-formatted-number value={takeHomePay} format-style="currency" currency-code="USD"></lightning-formatted-number></span></p>
+   <p class="slds-m-top_smalltop_small">Take Home Pay Amount: <span class="slds-text-color_success"><lightning-formatted-number value={takeHomePay} format-style="currency" currency-code="USD"></lightning-formatted-number></span></p>
+</div>
 </div>
 </div>
 </template>

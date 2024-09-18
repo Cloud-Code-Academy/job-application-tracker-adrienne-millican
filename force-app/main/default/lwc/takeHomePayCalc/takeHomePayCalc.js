@@ -1,34 +1,35 @@
 import { LightningElement, api, wire, track } from 'lwc';
 import getTaxRatePercentage  from '@salesforce/apex/TaxMetadataController.getTaxRatePercentage';
-import getFederalRate  from '@salesforce/apex/FederalRatesMetadataController.getFederalRate';
+import getSocialSecurityRate  from '@salesforce/apex/FederalRatesMetadataController.getSocialSecurityRate';
+import getMedicareRate  from '@salesforce/apex/FederalRatesMetadataController.getMedicareRate';
 
 export default class takeHomePayCalc extends LightningElement {
     @api recordId;
     @api fieldName = 'Salary__cc';
-    salaryTypeVal = null;
+    howPaidVal = null;
     payFrequencyVal = null;
     filingStatusVal = null;
     salAmt = null;
+    hrsWkd = null;
     addtlDeductAmt = null;
     addtlWithholdAmt = null;
     taxBr = 0.0;
-    medicareRate = 0.0;
-    socSecRate = 0.0;
-    rateType = null;
+    @track medicareRate = 0.0;
+    @track socSecRate = 0.0;
     error = null;
-    rate = 0.0;
     currYr = 0;
     takeHomePay = 0.00;
     fedExemptValue = null;
     medExemptValue = null;
     socExemptValue = null;
-    @track showCalculate = false;
-
-    federalRates = ['Medicare', 'Social Security'];
+    showCalculate = false;
+    showSalaried = false;
+    showHourly = false;
+    showLump = false;
 
     
     showButtonIfAllValuesPopulated(){
-    if (this.salaryTypeVal !== null &&
+    if (this.howPaidVal !== null &&
         this.payFrequencyVal !== null &&
         this.filingStatusVal !== null &&
         this.salAmt !== null &&
@@ -39,13 +40,35 @@ export default class takeHomePayCalc extends LightningElement {
          } else {
             this.showCalculate = false;
         }
-    
+    }
+
+    showSalariedOptions(){
+        if (this.howPaidVal === 'Salaried'){
+           this.showSalaried = true; 
+            this.showHourly = false;
+            this.showLump = false;
+
+        } else if(this.howPaidVal === 'Hourly') {
+            this.showHourly = true;
+            this.showSalaried = false;
+            this.showLump = false;
+        }
+        else if (this.howPaidVal === 'Lump'){
+            this.showHourly = false;
+            this.showSalaried = false;
+            this.showLump = true;
+        } else {
+            this.showHourly = false;
+            this.showSalaried = false;
+            this.showLump = false;
+        }
+
     }
  
-    get salaryOptions(){
+    get howPaidOptions(){
         return [
             { label: 'Hourly', value: 'Hourly' },
-            { label: 'Salaried', value: 'Salaried' },
+            { label: 'Salaried Annually', value: 'Salaried' },
             { label: 'Lump Sum', value: 'Lump' }
         ];
     }
@@ -78,16 +101,8 @@ export default class takeHomePayCalc extends LightningElement {
 
      getCurrentYear(){
         this.currYr = new Date().getFullYear();
-        console.log('**Current year: ' + this.currYr);
     }
 
-    getSocialSecurityRate(){
-           console.log('**Social Security Rate: ' + this.socSecRate);
-    }
-
-      getMedicareRate(){
-            console.log('**Medicare Rate: ' + this.medicareRate);
-    }
 
     @wire(getTaxRatePercentage, { filingStatusVal: '$filingStatusVal', salAmt: '$salAmt', currYr: '$currYr' }) taxBr 
     ({ error, data }) {
@@ -99,20 +114,36 @@ export default class takeHomePayCalc extends LightningElement {
     }
    }
 
-     @wire(getFederalRate, { rateType: '$rateType', currYr: '$currYr' }) rate
+     @wire(getSocialSecurityRate, {currYr: '$currYr' }) socSecRate
     ({ error, data }) {
        if (data) {
-           this.rate = data;
+           this.socSecRate = data;
        } else if (error) {
            this.error = error;
-           console.log('**Error from getFederalRate: ' + error);
+           console.log('**Error from getSocialSecurityRate: ' + error);
+    }
+   }
+
+   
+     @wire(getMedicareRate, {currYr: '$currYr' }) medicareRate
+    ({ error, data }) {
+       if (data) {
+           this.medicareRate = data;
+       } else if (error) {
+           this.error = error;
+           console.log('**Error from getMedicareRate: ' + error);
     }
    }
     
-      handleSalaryTypeChange(event){
-        this.salaryTypeVal = event.detail.value;
-        console.log('**salaryTypeVal: ' + this.salaryTypeVal);
+    connectedCallback(){
+        this.getCurrentYear(); 
+    }
+
+      handleHowPaidChange(event){
+        this.howPaidVal = event.detail.value;
+        console.log('**howPaidVal: ' + this.howPaidVal);
         this.showButtonIfAllValuesPopulated();
+        this.showSalariedOptions();
     }
 
      handlePayFreqChange(event){
@@ -133,6 +164,14 @@ export default class takeHomePayCalc extends LightningElement {
         if (inputName === 'salaryAmount'){
             this.salAmt = value;
             console.log('**salAmt value ' + this.salAmt);
+            this.showButtonIfAllValuesPopulated();
+        }else if (inputName === 'lumpSalaryAmount'){
+            this.salAmt = value;
+            console.log('**salAmt value ' + this.salAmt);
+            this.showButtonIfAllValuesPopulated();
+        } else if (inputName === 'hrsWorked'){
+            this.hrsWkd = value;
+            console.log('**hrsWkd value ' + this.hrsWkd);
             this.showButtonIfAllValuesPopulated();
         } else if (inputName === 'addtlDeductAmt'){
             this.addtlDeductAmt = value;
@@ -167,10 +206,8 @@ export default class takeHomePayCalc extends LightningElement {
     this.showButtonIfAllValuesPopulated();
     }
 
+
     handleClick(event){
-        this.getCurrentYear();
-        this.getSocialSecurityRate();
-        this.getMedicareRate();
         alert('Tax bracket: ' + this.taxBr);
     }
 
