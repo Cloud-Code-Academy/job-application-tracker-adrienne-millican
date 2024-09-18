@@ -2,7 +2,7 @@
   @description       : 
   @author            : admillican08@gmail.com
   @group             : 
-  @last modified on  : 09-17-2024
+  @last modified on  : 09-18-2024
   @last modified by  : admillican08@gmail.com
 -->
 <template>
@@ -11,7 +11,10 @@
         <p class="subHeadText">(All Rates Used are for the Current Year)</p>
    
   <!--Answer Relevant Questions-->
-    <div class="slds-p-horizontal_small">
+  <lightning-tabset>
+    <lightning-tab label="Please Select Data">
+    <div class="slds-m-left_small">
+        <div class="slds-m-top_medium">
         <lightning-combobox
         name="salaryType" 
         label="Salary Type" 
@@ -41,8 +44,13 @@
         onchange={handleFilingStatusChange} 
         required>
         </lightning-combobox>
-
+        </div>
+        </div>
+</lightning-tab>
 <!--Input Salary-->
+<lightning-tab label="Please Enter Data">
+        <div class="slds-m-left_small">
+            <div class="slds-m-top_medium">
         <lightning-input
         type="number" 
         name="salaryAmount"
@@ -77,7 +85,10 @@
         onchange={handleNumericChange}>
         </lightning-input>
     </div>
+    </div>
+    </lightning-tab>
     <!--Make Selection Re: Exemptions-->
+    <lightning-tab label="Please Select Correct Options">
     <div class="slds-m-left_small"> 
     <div class="slds-m-top_medium">
     <lightning-radio-group
@@ -106,6 +117,8 @@
     </lightning-radio-group>
   </div>
 </div>
+</lightning-tab>
+</lightning-tabset>
 </lightning-card>
 
     <!--Process-->
