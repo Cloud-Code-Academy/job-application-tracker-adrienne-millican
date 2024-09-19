@@ -2,17 +2,17 @@
   @description       : 
   @author            : admillican08@gmail.com
   @group             : 
-  @last modified on  : 09-18-2024
+  @last modified on  : 09-19-2024
   @last modified by  : admillican08@gmail.com
 -->
 <template>
     <lightning-card>
         <h1 slot="title" class="slds-text-heading_medium">Take Home Pay Calculator</h1>
-        <p class="subHeadText">All Rates Used are for the Current Year: {currYr}</p>
+        <p class="subHeadText">All Rates Used are for the Current Year: {currYr}; Uses Standard Deductions for Filing Status</p>
    
   <!--Answer Relevant Questions-->
   <lightning-tabset>
-    <lightning-tab label="Please Select Data">
+    <lightning-tab label="Please Provide Salary Data">
     <div class="slds-m-left_small">
         <lightning-combobox class="slds-m-top_small"
         name="howPaid" 
@@ -22,9 +22,7 @@
         options={howPaidOptions} 
         onchange={handleHowPaidChange}
         required>
-    </lightning-combobox>
-
-     <template lwc:if={showSalaried}>
+    </lightning-combobox>   
         <lightning-combobox class="slds-m-top_small"
         name="payFrequency" 
         label="Pay Frequency"
@@ -34,7 +32,6 @@
         onchange={handlePayFreqChange}
         required>
         </lightning-combobox>
-    </template>
     <template lwc:if={showSalaried}>
         <lightning-input class="slds-m-top_small"
          type="number" name="salaryAmount"
@@ -46,27 +43,25 @@
              onchange={handleNumericChange} 
              required>
         </lightning-input>
-    </template>
-        <template lwc:if={showLump}>
-            <lightning-input class="slds-m-top_small"
-             type="number" 
-             name="lumpSalaryAmount" 
-             label="Lump Salary Amount" 
-             value={salAmt}
-             formatter="currency" 
-             step="0.01"
-             placeholder="Enter the Lump Salary Amount"
-              onchange={handleNumericChange} 
-              required>
-            </lightning-input>
         </template>
     <template lwc:elseif={showHourly}>
-        <lightning-input class="slds-m-top_small"
+         <lightning-input class="slds-m-top_small"
          type="number" 
          name="hrsWorked" 
-         label="Hours Worked" 
+         label="Hours Worked Per Pay Period" 
+          step="0.01"
          value={hrsWkd}
         placeholder="Enter the Hours Worked"
+         onchange={handleNumericChange} 
+         required>
+        </lightning-input>
+    <lightning-input class="slds-m-top_small"
+         type="number" 
+         name="hrlyRate" 
+         label="Hourly Rate" 
+         value={hrlyRate}
+          step="0.01"
+        placeholder="Enter your Hourly Rate"
          onchange={handleNumericChange} 
          required>
         </lightning-input>
@@ -75,7 +70,7 @@
 </lightning-tab>
 <!--Input Salary-->
 
-<lightning-tab label="Please Enter Data">
+<lightning-tab label="Please Provide Other Relevant Data">
     <div class="slds-m-left_small">
 <lightning-combobox class="slds-m-top_small" 
     name="filingStatus" 
@@ -86,31 +81,53 @@
     onchange={handleFilingStatusChange} 
     required>
 </lightning-combobox>
-        <lightning-input class="slds-m-top_small"
+    <lightning-input class="slds-m-top_small"
         type="number" 
-        name="addtlDeductAmt" 
-        label="Additional Deduction Amount" 
-        value={addtlDeductAmt} 
+        name="addtlPretaxDeductAmt" 
+        label="Additional Pre-Tax Deduction Amount Per Paycheck" 
+        value={addtlPretaxDeductAmt} 
         formatter="currency" 
         step="0.01"
-        placeholder="Enter Any Additional Deduction Amount" 
+        placeholder="Enter Any Pre-Tax (Nontaxable) Deductions Per Paycheck" 
+        onchange={handleNumericChange}>
+        </lightning-input>
+   
+    <lightning-input class="slds-m-top_small"
+        type="number"
+        name="addtlPosttaxDeductAmt"
+         label="Additional Post-Tax Deduction Amount Per Paycheck"
+        value={addtlPosttaxDeductAmt}
+        formatter="currency"
+        step="0.01"
+        placeholder="Enter Any Post-Tax Deductions Per Paycheck"
         onchange={handleNumericChange}>
         </lightning-input>
 
-        <lightning-input class="slds-m-top_small"
+        <lightning-input class="slds-m-top_small" 
         type="number"
-        name="addtlWithholdingAmt"
-         label="Additional Witholding Amount"
-        value={addtlWithholdAmt}
-        formatter="currency"
-        step="0.01"
-        placeholder="Enter Any Additional Withholding Amount"
+        name="extraTax" 
+        label="Additional Tax Withheld Per Paycheck" 
+        value={extraTax}
+        formatter="currency"  
+        step="0.01" 
+        placeholder="Enter Any Additional Tax Withheld Per Paycheck"
         onchange={handleNumericChange}>
         </lightning-input>
+
+    <lightning-input class="slds-m-top_small" 
+        type="number" 
+        name="addtlIncome" 
+        label="Additional Income for the Year"
+        value={addtlIncome} 
+        formatter="currency" 
+        step="0.01" 
+        placeholder="Enter Any Additional Income"
+        onchange={handleNumericChange}>
+    </lightning-input>
     </div>
     </lightning-tab>
     <!--Make Selection Re: Exemptions-->
-    <lightning-tab label="Please Select Correct Options">
+    <lightning-tab label="Please Answer re: Exemptions">
     <div class="slds-m-left_small"> 
     <lightning-radio-group class="slds-m-top_small"
             name="federalExempt"
@@ -137,6 +154,26 @@
         required>
     </lightning-radio-group>
   </div>
+</lightning-tab>
+<lightning-tab label="Please Select the Applicable Options">
+    <div class="slds-m-left_small">
+        <lightning-radio-group class="slds-m-top_small" 
+            name="isBlind" 
+            label="Are You or Your Spouse Blind?"
+            options={radioOptions} 
+            value={value} 
+            onchange={handleIsBlind} 
+            required>
+        </lightning-radio-group>
+        <lightning-radio-group class="slds-m-top_small" 
+            name="isSenior" 
+            label="Are You Over 65 Years of Age?" 
+            options={radioOptions}
+            value={value} 
+            onchange={handleIsSenior} 
+            required>
+        </lightning-radio-group>
+    </div>
 </lightning-tab>
 </lightning-tabset>
 </lightning-card>

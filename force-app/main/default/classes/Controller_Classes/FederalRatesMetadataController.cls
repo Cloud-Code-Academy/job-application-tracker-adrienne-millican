@@ -27,6 +27,7 @@ public with sharing class FederalRatesMetadataController {
     for (Federal_Rates__mdt fedRateVal : federalRatesVals) {
       System.debug('**Current federalRateValue: ' + fedRateVal);
       if (
+        currYr != null &&
         fedRateVal.DeveloperName.equals(SOC_SEC) &&
         fedRateVal.Year_Valid__c == currYr
       ) {
