@@ -93,7 +93,7 @@ export default class takeHomePayCalc extends LightningElement {
 
       get filingStatusOptions(){
         return [
-            { label: 'Single', value: 'S' },
+            { label: 'Single', value: 'SIN' },
             { label: 'Married Filing Jointly', value: 'MFJ' },
             { label: 'Married Filling Separately', value: 'MFS' },
             { label: 'Head of Household', value: 'HOH' },
@@ -178,8 +178,13 @@ export default class takeHomePayCalc extends LightningElement {
     }
 
      handleFilingStatusChange(event){
-        this.filingStatusVal = event.detail.value;
-        console.log('**filingStatusVal: ' + this.filingStatusVal);
+        if(this.filingStatusVal !== null && this.filingStatusVal.includes('_')){
+        let filing =  this.filingStatusVal.slice(0,3);
+        this.filingStatusVal = this.filingStatusVal.replace(filing,event.detail.value);
+        } else {
+            this.filingStatusVal = event.detail.value;
+        }
+       console.log('**filingStatusVal after event capture: ' + this.filingStatusVal);
         this.showButtonIfAllValuesPopulated();
     }
 

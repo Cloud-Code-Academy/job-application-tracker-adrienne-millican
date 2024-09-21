@@ -2,10 +2,12 @@
  * @description       :
  * @author            : admillican08@gmail.com
  * @group             :
- * @last modified on  : 09-20-2024
+ * @last modified on  : 09-21-2024
  * @last modified by  : admillican08@gmail.com
  **/
 public with sharing class DeductionMetadataController {
+  public static final String BL = '_BL';
+  public static final String SR = '_SR';
   public static Map<String, Standard_Deduction__mdt> deductionMap {
     get {
       if (deductionMap == null) {
@@ -22,95 +24,64 @@ public with sharing class DeductionMetadataController {
     String filingStatusVal,
     Integer currYr
   ) {
-    Decimal deductAmt = 0.00;
     List<Standard_Deduction__mdt> deductionVals = deductionMap.values();
+    Decimal deductAmt = 0.00;
+    Decimal extraAmt = 0.00;
     for (Standard_Deduction__mdt deduction : deductionVals) {
       if (
         filingStatusVal != null &&
         currYr != null &&
         deduction.Year_Valid__c == currYr
       ) {
-        System.debug('**Deduction: ' + deduction.DeveloperName);
-        String devNme = deduction.DeveloperName;
-        if (devNme.equals(filingStatusVal)) {
-          System.debug('**Matched on filingstatusVal');
-          return (Decimal) (deduction.Amount__c);
-        } else if (
-          devNme.contains(filingStatusVal) &&
-          devNme.contains('_SR') &&
-          devNme.contains('BL') &&
-          filingStatusVal.contains('_SR') &&
-          filingStatusVal.contains('_BL')
-        ) {
-          System.debug('**Matched on filingstatusVal and BL and SR');
-          return (Decimal) (deduction.Amount__c);
-        } else if (
-          devNme.contains(filingStatusVal) &&
-          devNme.contains('_SR') &&
-          filingStatusVal.contains('_SR')
-        ) {
-          System.debug('**Matched on filingstatusVal and SR');
-          return (Decimal) (deduction.Amount__c);
-        } else if (
-          devNme.contains(filingStatusVal) &&
-          devNme.contains('_BL') &&
-          filingStatusVal.contains('_BL')
-        ) {
-          System.debug('**Matched on filingstatusVal and BL');
-          return (Decimal) (deduction.Amount__c);
+        System.debug('**Current filing status val: ' + filingStatusVal);
+        System.debug('**Current Deduction: ' + deduction.DeveloperName);
+
+        List<String> filingStatusValLst = filingStatusVal.split('_');
+        String devName = deduction.DeveloperName;
+        System.debug('**devname: ' + devName);
+        String filingVal = filingStatusval.substring(0, 3);
+        for (String str : filingStatusValLst) {
+          if (filingStatusValLst.size() == 1) {
+            if (filingStatusValLst[0].equals(devName)) {
+              System.debug('**Matched base deduction value');
+              deductAmt = getDeductionAmount(deduction);
+              break;
+            }
+          } else if (filingStatusValLst.size() == 2) {
+            if (filingStatusValLst[0].equals(devName)) {
+              deductAmt = getDeductionAmount(deduction);
+            } else if (
+              devName.contains(filingStatusValLst[1]) &&
+              devName.contains(filingStatusValLst[0]) &&
+              !(devName.contains(BL) && devName.contains(SR))
+            ) {
+              System.debug('**Matched BL or SR value');
+              extraAmt = getDeductionAmount(deduction);
+            }
+          } else if (filingStatusValLst.size() == 3) {
+            if (filingStatusValLst[0].equals(devName)) {
+              deductAmt = getDeductionAmount(deduction);
+            } else if (
+              devName.contains(BL) &&
+              devName.contains(SR) &&
+              devName.contains(filingStatusValLst[0])
+            ) {
+              System.debug('**Matched BL AND SR value');
+              extraAmt = getDeductionAmount(deduction);
+            }
+          }
         }
       }
     }
-    return deductAmt;
+    System.debug(
+      '**DeductionMetadataController returning ' + (deductAmt + extraAmt)
+    );
+    return (deductAmt + extraAmt);
   }
 
-   @AuraEnabled(cacheable=true)
-  public static Decimal getStandardDeduction(
-    String filingStatusVal,
-    Integer currYr,
-    Boolean isSenior,
-    Boolean isBlind
-  ) {
-    Decimal deductAmt = 0.00;
-    List<Standard_Deduction__mdt> deductionVals = deductionMap.values();
-    for (Standard_Deduction__mdt deduction : deductionVals) {
-      if (
-        filingStatusVal != null &&
-        currYr != null &&
-        deduction.Year_Valid__c == currYr
-      ) {
-        System.debug('**Deduction: ' + deduction.DeveloperName);
-        String devNme = deduction.DeveloperName;
-        if (devNme.equals(filingStatusVal)) {
-          System.debug('**Matched on filingstatusVal');
-          return (Decimal) (deduction.Amount__c);
-        } else if (
-          devNme.contains(filingStatusVal) &&
-          devNme.contains('_SR') &&
-          devNme.contains('BL') &&
-          filingStatusVal.contains('_SR') &&
-          filingStatusVal.contains('_BL')
-        ) {
-          System.debug('**Matched on filingstatusVal and BL and SR');
-          return (Decimal) (deduction.Amount__c);
-        } else if (
-          devNme.contains(filingStatusVal) &&
-          devNme.contains('_SR') &&
-          filingStatusVal.contains('_SR')
-        ) {
-          System.debug('**Matched on filingstatusVal and SR');
-          return (Decimal) (deduction.Amount__c);
-        } else if (
-          devNme.contains(filingStatusVal) &&
-          devNme.contains('_BL') &&
-          filingStatusVal.contains('_BL')
-        ) {
-          System.debug('**Matched on filingstatusVal and BL');
-          return (Decimal) (deduction.Amount__c);
-        }
-      }
-    }
+  @testVisible
+  private static Decimal getDeductionAmount(Standard_Deduction__mdt deduction) {
+    Decimal deductAmt = (Decimal) deduction.Amount__c;
     return deductAmt;
   }
-
 }
