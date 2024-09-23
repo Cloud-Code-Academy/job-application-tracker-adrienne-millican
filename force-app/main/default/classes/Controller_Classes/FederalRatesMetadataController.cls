@@ -2,7 +2,7 @@
  * @description       :
  * @author            : admillican08@gmail.com
  * @group             :
- * @last modified on  : 09-18-2024
+ * @last modified on  : 09-22-2024
  * @last modified by  : admillican08@gmail.com
  **/
 public with sharing class FederalRatesMetadataController {
@@ -36,6 +36,23 @@ public with sharing class FederalRatesMetadataController {
     }
     System.debug('**Returning 0.00 rate for ' + SOC_SEC);
     return socSecRate;
+  }
+
+  @AuraEnabled(cacheable=true)
+  public static Decimal getSocialSecurityMaxVal(Integer currYr) {
+    Decimal socSecMaxVal = 0.00;
+    List<Federal_Rates__mdt> federalRatesVals = federalRatesMap.values();
+    for (Federal_Rates__mdt fedRateVal : federalRatesVals) {
+      if (
+        currYr != null &&
+        fedRateVal.DeveloperName.equals(SOC_SEC) &&
+        fedRateVal.Year_Valid__c == currYr
+      ) {
+        return fedRateVal.Max_Value__c;
+      }
+    }
+    System.debug('**Returning 0.00 max val for ' + SOC_SEC);
+    return socSecMaxVal;
   }
 
   @AuraEnabled(cacheable=true)

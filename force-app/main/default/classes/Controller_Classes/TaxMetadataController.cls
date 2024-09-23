@@ -2,7 +2,7 @@
  * @description       :
  * @author            : admillican08@gmail.com
  * @group             :
- * @last modified on  : 09-19-2024
+ * @last modified on  : 09-22-2024
  * @last modified by  : admillican08@gmail.com
  **/
 public with sharing class TaxMetadataController {
@@ -17,30 +17,103 @@ public with sharing class TaxMetadataController {
     set;
   }
 
-  @AuraEnabled(cacheable=true)
-  public static Decimal getTaxRatePercentage(
+  @AuraEnabled
+  public static String getTaxBracketName(
     String filingStatusVal,
-    Decimal salAmt,
+    Decimal taxableInc,
     Integer currYr
   ) {
-    Decimal taxBr = 0.00;
+    String taxBrName = '';
+    String subStr = filingStatusVal.subString(0, 3);
     List<Tax_Bracket__mdt> taxBracketVals = taxBracketMap.values();
     for (Tax_Bracket__mdt taxBracket : taxBracketVals) {
       if (
         filingStatusVal != null &&
-        salAmt != null &&
+        taxableInc != null &&
         currYr != null &&
-        taxBracket.DeveloperName.startsWith(filingStatusVal) &&
-        (Decimal) (taxBracket.Starting_Salary__c) <= salAmt &&
+        taxBracket.DeveloperName.startsWith(subStr) &&
+        (Decimal) (taxBracket.Starting_Salary__c) <= taxableInc &&
         (taxBracket.Ending_Salary__c == 0 ||
-        (Decimal) (taxBracket.Ending_Salary__c) >= salAmt) &&
+        (Decimal) (taxBracket.Ending_Salary__c) >= taxableInc) &&
         taxBracket.Year_Valid__c == currYr
       ) {
         System.debug('**Found match on ' + taxBracket.developername);
-        return Decimal.valueOf(taxBracket.Tax_Rate__c);
+        taxBrName = taxBracket.masterLabel;
+        System.debug('**Returning taxBracketName of ' + taxBrName);
       }
     }
-    System.debug('**Returning 0.00 tax rate');
-    return taxBr;
+
+    return taxBrName;
+  }
+
+  @AuraEnabled
+  public static Decimal getStartingSalaryForTaxBracketName(
+    String taxBrName,
+    Integer currYr
+  ) {
+    Decimal startingSal = 0.00;
+    List<Tax_Bracket__mdt> taxBracketVals = taxBracketMap.values();
+    for (Tax_Bracket__mdt taxBracket : taxBracketVals) {
+      if (
+        taxBrName != null &&
+        currYr != null &&
+        taxBracket.MasterLabel.equals(taxBrName) &&
+        taxBracket.Year_Valid__c == currYr
+      ) {
+        System.debug(
+          '**Found starting sal match on ' + taxBracket.developername
+        );
+        startingSal = (Decimal) taxBracket.Starting_Salary__c;
+        System.debug('**Returning starting salary match of ' + startingSal);
+      }
+    }
+
+    return startingSal;
+  }
+
+  @AuraEnabled
+  public static Decimal getEndingSalaryForTaxBracketName(
+    String taxBrName,
+    Integer currYr
+  ) {
+    Decimal endingSal = 0.00;
+    List<Tax_Bracket__mdt> taxBracketVals = taxBracketMap.values();
+    for (Tax_Bracket__mdt taxBracket : taxBracketVals) {
+      if (
+        taxBrName != null &&
+        currYr != null &&
+        taxBracket.MasterLabel.equals(taxBrName) &&
+        taxBracket.Year_Valid__c == currYr
+      ) {
+        System.debug('**Found ending sal match on ' + taxBracket.developername);
+        endingSal = (Decimal) taxBracket.Ending_Salary__c;
+        System.debug('**Returning ending salary match of ' + endingSal);
+      }
+    }
+
+    return endingSal;
+  }
+
+  @AuraEnabled
+  public static Decimal getTaxRateForTaxBracketName(
+    String taxBrName,
+    Integer currYr
+  ) {
+    Decimal taxRate = 0.00;
+    List<Tax_Bracket__mdt> taxBracketVals = taxBracketMap.values();
+    for (Tax_Bracket__mdt taxBracket : taxBracketVals) {
+      if (
+        taxBrName != null &&
+        currYr != null &&
+        taxBracket.MasterLabel.equals(taxBrName) &&
+        taxBracket.Year_Valid__c == currYr
+      ) {
+        System.debug('**Found tax Rate match on ' + taxBracket.developername);
+        taxRate = Decimal.valueOf(taxBracket.Tax_Rate__c);
+        System.debug('**Returning rate of ' + taxRate);
+      }
+    }
+
+    return taxRate;
   }
 }

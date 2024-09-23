@@ -13,3 +13,23 @@
     margin-top: 10px;
     margin-bottom: 10px;
 }
+
+.labelText {
+    font-size: small;
+    font-weight: bold;
+    align-items: left;
+    margin-top: 15px;
+}
+
+.resultText {
+    font-size: medium;
+    font-weight: bold;
+    align-items: left;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    background-color: white;
+}
+
+.strong-text{
+    font-weight: bold
+}
