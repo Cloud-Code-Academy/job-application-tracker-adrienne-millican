@@ -434,8 +434,9 @@ export default class takeHomePayCalc extends LightningElement {
             console.log('**maxInt value: ' + maxInt);
             let i = maxInt;
             let currTaxRate = this.handleGetTaxRateForTaxBracketName(taxBrName);
-            let startingSal = this.handleGetStartingSalary(taxBrName);
             let endingSal = this.taxableInc;
+            let startingSal = this.handleGetStartingSalary(taxBrName);
+           fedTaxOwed = this.calculateTaxForBlock(endingSal, startingSal, currTaxRate);
 
             do{
                 i--;
@@ -444,7 +445,10 @@ export default class takeHomePayCalc extends LightningElement {
                 currTaxRate = this.handleGetTaxRateForTaxBracketName(taxBrName);
                 endingSal = this.handleGetEndingSalary(taxBrName);
                 startingSal = this.handleGetStartingSalary(taxBrName);
-                fedTaxOwed = this.calculateTaxForBlock(endingSal, startingSal,currTaxRate);
+                fedTaxOwed += this.calculateTaxForBlock(endingSal, startingSal, currTaxRate);
+                 console.log('**endingSal in calcFedTax: ' + endingSal);
+                 console.log('**startingSal in calcFedTax: ' + startingSal);
+                console.log('**taxRate in calcFedTax: ' + currTaxRate);
                 console.log('**FedTaxOwed: ' + fedTaxOwed);
                 
             } while (i > 0);
@@ -453,10 +457,13 @@ export default class takeHomePayCalc extends LightningElement {
     }
 
     calculateTaxForBlock(endingSal, startingSal, taxRate){
+        console.log('**endingSal in calcTaxForBlock: ' + endingSal);
+        console.log('**startingSal in calcTaxForBlock: ' + startingSal);
+        console.log('**taxRate in calcTaxForBlock: ' + taxRate);
         let taxPercent = taxRate/100;
         console.log('**taxPercent: ' + taxPercent);
         let block = endingSal - startingSal;
-        console.log('**Block: ' + block);
+        console.log('**Block Amt: ' + block);
         let tax = taxPercent * block;
         console.log('**tax: ' + tax);
         return tax;

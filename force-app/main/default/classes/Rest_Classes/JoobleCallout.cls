@@ -2,7 +2,7 @@
  * @description       :
  * @author            : admillican08@gmail.com
  * @group             :
- * @last modified on  : 09-12-2024
+ * @last modified on  : 09-23-2024
  * @last modified by  : admillican08@gmail.com
  **/
 public with sharing class JoobleCallout {
@@ -32,63 +32,17 @@ public with sharing class JoobleCallout {
     if (response.getStatusCode() == 200) {
       String jsonStr = response.getBody();
       jsonStr = removeExtraneous(jsonStr);
-      Dump__c newDump = new Dump__c(Text__c = jsonStr);
-      insert newDump;
+      // newDump = new Dump__c(Text__c = jsonStr);
+      //insert newDump;
       JSONParser parser = JSON.createParser(jsonStr);
-      List<JoobleJob> joobleJobLst = new List<JoobleJob>();
+      List<Position__c> joobleJobLst = new List<Position__c>();
       parser.nextToken();
       parser.nextToken();
-      JoobleJob newJob;
       while (parser.nextToken() != null) {
-        if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
-          switch on parser.getText() {
-            when 'title' {
-              newJob = new JoobleJob();
-              parser.nextValue();
-              newJob.title = parser.getText();
-            }
-            when 'location' {
-              parser.nextValue();
-              newJob.location = parser.getText();
-            }
-            when 'snippet' {
-              parser.nextValue();
-              newJob.description = parser.getText();
-            }
-            when 'salary' {
-              parser.nextValue();
-              newJob.salary = parser.getText();
-            }
-            when 'source' {
-              parser.nextValue();
-              newJob.source = parser.getText();
-            }
-            when 'type' {
-              parser.nextValue();
-              newJob.type = parser.getText();
-            }
-            when 'link' {
-              parser.nextValue();
-              newJob.link = parser.getText();
-            }
-            when 'company' {
-              parser.nextValue();
-              newJob.company = parser.getText();
-            }
-            when 'updated' {
-              parser.nextValue();
-              newJob.updated = parser.getText();
-            }
-            when 'id' {
-              parser.nextValue();
-              newJob.id = parser.getText();
-              joobleJobLst.add(newJob);
-              System.debug('**New job: ' + newJob);
-            }
-          }
-        }
-      }
+        Position__c newPosn = new Position__c();
 
+        joobleJobLst.add(newPosn);
+      }
       System.debug('**Size of Jooble Job List is ' + joobleJobLst.size());
     }
   }
@@ -101,5 +55,58 @@ public with sharing class JoobleCallout {
     input = input.replaceAll('\\?\\?', '');
     input = input.replaceAll('</*[a-z]>', '');
     return input;
+  }
+
+  @testVisible
+  private static Position__c createPosition(
+    JsonParser parser,
+    Position__c posn
+  ) {
+    if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
+      switch on parser.getText() {
+        when 'title' {
+          parser.nextValue();
+          posn.Title__c = parser.getText();
+        }
+        when 'location' {
+          parser.nextValue();
+          posn.Job_Location__c = parser.getText();
+        }
+        when 'snippet' {
+          parser.nextValue();
+          posn.Position_Description__c = parser.getText();
+        }
+        when 'salary' {
+          parser.nextValue();
+          posn.Salary__c = Decimal.valueOf(parser.getText());
+        }
+        when 'source' {
+          parser.nextValue();
+          posn.Source__c = parser.getText();
+        }
+        when 'type' {
+          parser.nextValue();
+          posn.Time_Type__c = parser.getText();
+        }
+        when 'link' {
+          parser.nextValue();
+          posn.Position_Link__c = parser.getText();
+        }
+        when 'company' {
+          parser.nextValue();
+          posn.company = parser.getText();
+        }
+        when 'updated' {
+          parser.nextValue();
+          posn.updated = parser.getText();
+        }
+        when 'id' {
+          parser.nextValue();
+          posn.id = parser.getText();
+          System.debug('**New job: ' + posn);
+        }
+      }
+    }
+    return posn;
   }
 }
