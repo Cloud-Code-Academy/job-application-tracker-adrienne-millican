@@ -257,44 +257,6 @@ public with sharing class JoobleCallout {
     return posnLst;
   }
 
-  /*
-public with sharing class JoobleCallout {
-  public static final String OBJ_NAME = 'Position';
-  public static final string CLS_NAME = 'JoobleCallout';
-
-  @future(callout=true)
-  public static void createNewPositionsFromJooble() {
-    final String MTD_NAME = 'createNewPositionsFromJooble';
-    List<Position__c> newPosnLst = new List<Position__c>();
-    String apiKey = [
-      SELECT MasterLabel, Value__c
-      FROM Api_Key__mdt
-      WHERE MasterLabel = 'Jooble'
-      WITH USER_MODE
-      LIMIT 1
-    ]
-    .Value__c;
-    String keywordStr = '{ keywords: \'Salesforce\', location: \'United States\'}';
-    // Create HTTP request to send.
-    HttpRequest request = new HttpRequest();
-    // Set the endpoint URL. Use direct URL or for best practices use Named Credential.
-    request.setEndpoint('callout:Jooble' + '/' + apiKey);
-    request.setHeader('Content-type', 'application/json');
-    // Set the HTTP method to POST.
-    request.setMethod('POST');
-    request.setBody(keyWordStr);
-    // Send the HTTP request and get the response.
-    Http http = new Http();
-    HttpResponse response = http.send(request);
-    // If the HTTP response code is successful
-    if (response.getStatusCode() == 200) {
-      String jsonStr = response.getBody();
-      jsonStr = removeExtraneous(jsonStr);
-      Dump__c newDump = new Dump__c(Text__c = jsonStr);
-      insert newDump;
-    }
-  }
-*/
   @testVisible
   private static String removeExtraneous(String input) {
     input = input.replaceAll('\\\\[a-z]', '');

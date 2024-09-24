@@ -2,7 +2,7 @@
  * @description       :
  * @author            : admillican08@gmail.com
  * @group             :
- * @last modified on  : 09-11-2024
+ * @last modified on  : 09-24-2024
  * @last modified by  : admillican08@gmail.com
  **/
 
@@ -140,19 +140,16 @@ public without sharing class Util_TestDataFactory {
       'Sheridan'
     };
 
-    for (Integer k = 0; k < stateAbbrevLst.size(); k++) {
-      Integer index = math.mod(k, stateAbbrevLst.size());
-      Integer randomNumber = Utils_RandomGenerator.genRandIntLessThan(1000);
-      String acctName =
-        Utils_RandomGenerator.generateCompanyName() +
-        ' ' +
-        randomNumber;
+    for (Integer k = 0; k < numAccts; k++) {
+      Integer index = math.mod(numAccts, stateAbbrevLst.size());
+      Integer randomNumber = genRandIntLessThan(1000);
+      String acctName = 'Test ' + generateCompanyName() + ' ' + randomNumber;
       Account acct = new Account(
         Name = acctName,
         BillingCity = cityLst[index],
-        BillingState = stateAbbrevLst[index],
-        BillingCountry = 'US',
-        BillingPostalCode = Utils_RandomGenerator.generateRandomNumberString(5),
+        BillingStateCode = stateAbbrevLst[index],
+        BillingCountry = 'United States',
+        BillingPostalCode = generateRandomNumberString(5),
         OwnerId = UserInfo.getUserId()
       );
       newAccts.add(acct);
@@ -177,7 +174,7 @@ public without sharing class Util_TestDataFactory {
         Email_Domain__c,
         BillingStreet,
         BillingCity,
-        BillingState,
+        BillingStateCode,
         BillingPostalCode,
         BillingCountry
       FROM Account
@@ -192,7 +189,7 @@ public without sharing class Util_TestDataFactory {
       LastName = lname,
       Email = fname + '.' + lname + '@' + emailDom,
       MailingCity = acct.BillingCity,
-      MailingState = acct.BillingState,
+      MailingStateCode = acct.BillingStateCode,
       MailingPostalCode = acct.BillingPostalCode,
       MailingCountry = acct.BillingCountry
     );
@@ -260,12 +257,12 @@ public without sharing class Util_TestDataFactory {
     for (Account acct : acctMap.values()) {
       for (Integer i = 0; i < numContactsPerAcct; i++) {
         // Randomly select a title
-        Integer randomTitle = Utils_RandomGenerator.genRandIntLessThan(20);
+        Integer randomTitle = genRandIntLessThan(20);
         String title = titleLst[randomTitle];
 
         // Generate random first and last names
-        String fname = Utils_RandomGenerator.generatePersonName('first');
-        String lname = Utils_RandomGenerator.generatePersonName('last');
+        String fname = generatePersonName('first');
+        String lname = generatePersonName('last');
         String emailDom = acct.Email_Domain__c ?? 'emaildomain.com';
         // Create contact
         Contact contct = new Contact(
@@ -300,7 +297,7 @@ public without sharing class Util_TestDataFactory {
     String lname,
     Boolean doInsert
   ) {
-    Integer randomNumber = Utils_RandomGenerator.genRandIntLessThan(1000);
+    Integer randomNumber = genRandIntLessThan(1000);
     User testUser = new User(
       FirstName = fname,
       LastName = lname,
@@ -317,5 +314,141 @@ public without sharing class Util_TestDataFactory {
       insert testUser;
     }
     return testUser;
+  }
+
+  public static String generateRandomString(Integer len) {
+    final String chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz';
+    String randStr = '';
+    while (randStr.length() < len) {
+      Integer idx = Math.mod(
+        Math.abs(Crypto.getRandomInteger()),
+        chars.length()
+      );
+      randStr += chars.substring(idx, idx + 1);
+    }
+    return randStr;
+  }
+
+  public static String generateRandomNumberString(Integer len) {
+    final String chars = '0123456789';
+    String randStr = '';
+    while (randStr.length() < len) {
+      Integer idx = Math.mod(
+        Math.abs(Crypto.getRandomInteger()),
+        chars.length()
+      );
+      randStr += chars.substring(idx, idx + 1);
+    }
+    return randStr;
+  }
+
+  public static Integer genRandIntLessThan(Integer supplInt) {
+    Integer returnVal = 0;
+    if (supplInt == 0) {
+      System.debug('Cannot generate a random integer from 0');
+    } else {
+      returnVal = Integer.valueOf(Math.floor(Math.random() * supplInt));
+    }
+    return returnVal;
+  }
+
+  public static String generateCompanyName() {
+    String cmpName = '';
+    Integer randomNum = genRandIntLessThan(9);
+    Integer useThird = genRandIntLessThan(2);
+    List<String> cmpOneNamesLst = new List<String>{
+      'American',
+      'Computer',
+      'Information',
+      'Health',
+      'Industrial',
+      'Preferred',
+      'New',
+      'International',
+      'Information',
+      'Business'
+    };
+    List<String> cmpTwoNamesLst = new List<String>{
+      'Solutions',
+      'Technology',
+      'Systems',
+      'Consultants',
+      'Corporation',
+      'Technology',
+      'Services',
+      'Group',
+      'Development',
+      'Associates'
+    };
+    cmpName = cmpOneNamesLst[randomNum] + ' ' + cmpTwoNamesLst[randomNum];
+    if (useThird == 1) {
+      cmpName = cmpName + ' ' + cmpTwoNamesLst[randomNum + 1];
+    }
+    return cmpName;
+  }
+
+  public static String generatePersonName(String firstOrLast) {
+    String persName = '';
+    Integer randomNum = genRandIntLessThan(25);
+    List<String> firstNamesLst = new List<String>{
+      'Alexa',
+      'Fern',
+      'Constance',
+      'Daniella',
+      'Hannah',
+      'Seth',
+      'Jasper',
+      'Caleb',
+      'Adil',
+      'Harold',
+      'Jaydon',
+      'Marvin',
+      'Zeeshan',
+      'Rocco',
+      'Adam',
+      'Naima',
+      'Cynthia',
+      'Lola',
+      'Mae',
+      'Ffion',
+      'Rory',
+      'Dakota',
+      'Teddie',
+      'Finley',
+      'Kasey'
+    };
+    List<String> LastNamesLst = new List<String>{
+      'Hargrave',
+      'Sitz',
+      'Alfarsi',
+      'Larsen',
+      'Cuana',
+      'Giraud',
+      'Cuypers',
+      'Kulkarni',
+      'Abbes',
+      'Hafner',
+      'Cox',
+      'Sogg',
+      'Hammond',
+      'Patterson',
+      'Salazar',
+      'Lam',
+      'Shah',
+      'Blackburn',
+      'Hickman',
+      'Soelberg',
+      'Fortescue',
+      'Nunnaly',
+      'Novak',
+      'Gigliotti',
+      'Selin'
+    };
+    if (firstOrLast.startsWithIgnoreCase('f')) {
+      persName = firstNamesLst[randomNum];
+    } else if (firstOrLast.startsWithIgnoreCase('l')) {
+      persName = lastNamesLst[randomNum];
+    }
+    return persName;
   }
 }

@@ -2,7 +2,7 @@
  * @description       :
  * @author            : Adrienne D. Millican <adrienne.millican@swisslog-healthcare.com>
  * @group             :
- * @last modified on  : 09-11-2024
+ * @last modified on  : 09-24-2024
  * @last modified by  : admillican08@gmail.com
  **/
 @IsTest
@@ -29,35 +29,11 @@ class Util_UpsertTest {
   }
   @IsTest
   static void testUpsertListSuccessflly() {
-    Id prmSetId = [
-      SELECT Id
-      FROM PermissionSet
-      WHERE Name = 'Rule_Exempt_Permission'
-      LIMIT 1
-    ]
-    .Id;
-    Id currUsrId = UserInfo.getUserId();
-    PermissionSetAssignment ruleExAssign = [
-      SELECT Id
-      FROM PermissionSetAssignment
-      WHERE
-        IsActive = TRUE
-        AND AssigneeId = :currUsrId
-        AND PermissionSetId = :prmSetId
-      LIMIT 1
-    ];
-    if (ruleExAssign == null) {
-      PermissionSetAssignment newPermSet = new PermissionSetAssignment(
-        AssigneeId = currUsrId,
-        PermissionSetId = prmSetId
-      );
-      insert newPermSet;
-    }
     String methodName = 'testUpsertListSuccessfully of Util_UpsertTest class';
     List<Account> testAccts = [
       SELECT Id, OwnerId
       FROM Account
-      WHERE Name LIKE 'Test Acct %'
+      WHERE Name LIKE 'Test %' AND CreatedDate = TODAY
       LIMIT 4
     ];
     List<Contact> testContacts = Util_TestDataFactory.createTestContacts(
@@ -82,35 +58,11 @@ class Util_UpsertTest {
 
   @IsTest
   static void testUpsertSingleRecordSuccessflly() {
-    Id prmSetId = [
-      SELECT Id
-      FROM PermissionSet
-      WHERE Name = 'Rule_Exempt_Permission'
-      LIMIT 1
-    ]
-    .Id;
-    Id currUsrId = UserInfo.getUserId();
-    PermissionSetAssignment ruleExAssign = [
-      SELECT Id
-      FROM PermissionSetAssignment
-      WHERE
-        IsActive = TRUE
-        AND AssigneeId = :currUsrId
-        AND PermissionSetId = :prmSetId
-      LIMIT 1
-    ];
-    if (ruleExAssign == null) {
-      PermissionSetAssignment newPermSet = new PermissionSetAssignment(
-        AssigneeId = currUsrId,
-        PermissionSetId = prmSetId
-      );
-      insert newPermSet;
-    }
     String methodName = 'testUpsertSingleRecordSuccessfully of Util_UpsertTest class';
     List<Account> testAccts = [
       SELECT Id
       FROM Account
-      WHERE Name LIKE 'Test Acct %'
+      WHERE Name LIKE 'Test %' AND CreatedDate = TODAY
       LIMIT 4
     ];
     List<Contact> testContacts = Util_TestDataFactory.createTestContacts(
@@ -135,86 +87,13 @@ class Util_UpsertTest {
   }
 
   @IsTest
-  static void testUpsertInvocableSuccessfully() {
-    Id prmSetId = [
-      SELECT Id
-      FROM PermissionSet
-      WHERE Name = 'Rule_Exempt_Permission'
-      LIMIT 1
-    ]
-    .Id;
-    Id currUsrId = UserInfo.getUserId();
-    PermissionSetAssignment ruleExAssign = [
-      SELECT Id
-      FROM PermissionSetAssignment
-      WHERE
-        IsActive = TRUE
-        AND AssigneeId = :currUsrId
-        AND PermissionSetId = :prmSetId
-      LIMIT 1
-    ];
-    if (ruleExAssign == null) {
-      PermissionSetAssignment newPermSet = new PermissionSetAssignment(
-        AssigneeId = currUsrId,
-        PermissionSetId = prmSetId
-      );
-      insert newPermSet;
-    }
-    String methodName = 'testUpsertInvocableSuccessfully of Util_UpsertTest class';
-    List<Account> testAccts = [
-      SELECT Id
-      FROM Account
-      WHERE Name LIKE 'Test Acct %'
-      LIMIT 4
-    ];
-    List<Contact> testContacts = Util_TestDataFactory.createTestContacts(
-      testAccts,
-      100,
-      false
-    );
-    List<List<sObject>> listOfSObjLists = new List<List<sObject>>();
-    listOfSObjLists.add(testContacts);
-    Util_Upsert.upsertListInvocable(listOfSObjLists);
-    Assert.IsTrue(
-      Util_Upsert.messageStr.contains(
-        '**Upserted 400 record(s) of Contact type'
-      ),
-      'Result message after invocable upsert not as expected.'
-    );
-  }
-
-  @IsTest
   static void testUpsertDeliberatelyThrowException() {
-    Id prmSetId = [
-      SELECT Id
-      FROM PermissionSet
-      WHERE Name = 'Rule_Exempt_Permission'
-      LIMIT 1
-    ]
-    .Id;
-    Id currUsrId = UserInfo.getUserId();
-    String message = '';
-    PermissionSetAssignment ruleExAssign = [
-      SELECT Id
-      FROM PermissionSetAssignment
-      WHERE
-        IsActive = TRUE
-        AND AssigneeId = :currUsrId
-        AND PermissionSetId = :prmSetId
-      LIMIT 1
-    ];
-    if (ruleExAssign == null) {
-      PermissionSetAssignment newPermSet = new PermissionSetAssignment(
-        AssigneeId = currUsrId,
-        PermissionSetId = prmSetId
-      );
-      insert newPermSet;
-    }
     String methodName = 'testUpsertDeliberatelyThrowException of Util_UpsertTest class';
+    String message = '';
     List<Account> testAccts = [
       SELECT Id, OwnerId
       FROM Account
-      WHERE Name LIKE 'Test Acct %'
+      WHERE Name LIKE 'Test %' AND CreatedDate = TODAY
       LIMIT 1
     ];
 
@@ -231,7 +110,7 @@ class Util_UpsertTest {
       message = cex.getMessage();
     }
     Assert.isTrue(
-      message.startsWith('***ERROR:'),
+      message.startsWith('**ERROR:'),
       'Error message not as expected'
     );
   }

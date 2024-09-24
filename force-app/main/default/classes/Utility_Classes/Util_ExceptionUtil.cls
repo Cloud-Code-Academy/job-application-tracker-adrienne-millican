@@ -2,7 +2,7 @@
  * @description       :
  * @author            : admillican08@gmail.com
  * @group             :
- * @last modified on  : 09-10-2024
+ * @last modified on  : 09-24-2024
  * @last modified by  : admillican08@gmail.com
  **/
 
@@ -45,44 +45,5 @@ public without sharing class Util_ExceptionUtil {
     pe.Running_User_Id__c = UserInfo.getUserId();
     EventBus.publish(pe);
     throwCustomException(new List<String>{ excDetails });
-  }
-
-  // publish multiple Platform Events. This allows us
-  // to capture information aobut a series of Exceptions
-  // thrown even if they are rolled back
-
-  public static void publishException(
-    String objName,
-    String procName,
-    String opName,
-    List<Database.SaveResult> saveResLst
-  ) {
-    Exception_Log__e pe;
-    for (Database.SaveResult res : saveResLst) {
-      if (!res.isSuccess()) {
-        // for every unsuccessful save, publish
-        // an Exception Log event
-        pe = new Exception_Log__e();
-        pe.Object__c = objName;
-        pe.Process__c = procName;
-        pe.Operation__c = opName;
-        for (Database.Error err : res.getErrors()) {
-          String excDetail =
-            err.getStatusCode() +
-            ':' +
-            err.getMessage() +
-            '; ' +
-            new dmlException().getStackTraceString();
-          String recId = res.getId();
-          Util_ExceptionUtil.publishException(
-            objName,
-            procName,
-            opName,
-            recId,
-            excDetail
-          );
-        }
-      }
-    }
   }
 }

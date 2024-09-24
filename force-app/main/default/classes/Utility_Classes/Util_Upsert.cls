@@ -2,7 +2,7 @@
  * @description       :
  * @author            : Adrienne D. Millican <adrienne.millican@swisslog-healthcare.com>
  * @group             :
- * @last modified on  : 09-11-2024
+ * @last modified on  : 09-24-2024
  * @last modified by  : admillican08@gmail.com
  **/
 public without sharing class Util_Upsert {
@@ -101,31 +101,5 @@ public without sharing class Util_Upsert {
       ' called by ' +
       callingMethod;
     return Util_Upsert.upsertList(objName, objLst, callingMethod);
-  }
-
-  @InvocableMethod(
-    label='Upsert Records'
-    description='Allows the upsert of sObject records'
-  )
-  /**
-   * @description Invocable method for upserting a list of list of sObjects
-   * @author admillican08@gmail.com | 09-11-2024
-   * @param lstofSobjectLsts
-   **/
-  public static void upsertListInvocable(List<List<sObject>> lstofSobjectLsts) {
-    final String MTHD_NAME = 'upsertListInvocable method';
-    List<sObject> objLst = new List<sObject>();
-    for (List<sObject> invLst : lstofSobjectLsts) {
-      if (invLst.size() > 0) {
-        for (sObject obj : invLst) {
-          objLst.add(obj);
-        }
-      }
-    }
-    messageStr = Util_Upsert.upsertList(
-      '<objName>',
-      objLst,
-      MTHD_NAME + ', ' + CLSS_NAME
-    );
   }
 }

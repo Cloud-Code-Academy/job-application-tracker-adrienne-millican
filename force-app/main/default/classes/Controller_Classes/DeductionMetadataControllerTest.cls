@@ -23,7 +23,7 @@ public class DeductionMetadataControllerTest {
     Assert.areEqual(
       21900,
       hohDeduction,
-      'HOH standard deduction for 2024 should be $21,900.'
+      'HOH standard deduction for 2024 should be 21900.'
     );
 
     // Married Filing Jointly (MFJ) for the current year
@@ -34,7 +34,7 @@ public class DeductionMetadataControllerTest {
     Assert.areEqual(
       29200,
       mfjDeduction,
-      'MFJ standard deduction for 2024 should be $29,200.'
+      'MFJ standard deduction for 2024 should be 29200'
     );
 
     // Married Filing Separately (MFS) for the current year
@@ -45,7 +45,7 @@ public class DeductionMetadataControllerTest {
     Assert.areEqual(
       14600,
       mfsDeduction,
-      'MFS standard deduction for 2024 should be $14,600.'
+      'MFS standard deduction for 2024 should be 14600'
     );
 
     // Test Blind (BL) status for Married Filing Jointly (MFJ)
@@ -56,7 +56,7 @@ public class DeductionMetadataControllerTest {
     Assert.areEqual(
       30750,
       mfjBlindDeduction,
-      'MFJ Blind deduction for 2024 should be $30,750.'
+      'MFJ Blind deduction for 2024 should be 30750'
     );
 
     // Test Senior (SR) status for Married Filing Jointly (MFJ)
@@ -67,7 +67,7 @@ public class DeductionMetadataControllerTest {
     Assert.areEqual(
       30750,
       mfjSeniorDeduction,
-      'MFJ Senior deduction for 2024 should be $30750.'
+      'MFJ Senior deduction for 2024 should be 30750'
     );
 
     // Test Blind and Senior (BL_SR) status for Married Filing Jointly (MFJ)
@@ -78,7 +78,7 @@ public class DeductionMetadataControllerTest {
     Assert.areEqual(
       32300,
       mfjBlindSeniorDeduction,
-      'MFJ Blind and Senior deduction for 2024 should be $32,300.'
+      'MFJ Blind and Senior deduction for 2024 should be 32300.'
     );
 
     // Invalid year test case
@@ -90,7 +90,7 @@ public class DeductionMetadataControllerTest {
     Assert.areEqual(
       0,
       invalidYearDeduction,
-      'HOH standard deduction for an invalid year (2023) should return 0.'
+      'HOH standard deduction for 2023 should return 0.'
     );
 
     // Invalid filing status (should return 0)
@@ -125,7 +125,7 @@ public class DeductionMetadataControllerTest {
     Assert.areEqual(
       29200,
       mfjDeductionAmount,
-      'MFJ deduction amount should be $29,200.'
+      'MFJ deduction amount should be 29200'
     );
 
     // Fetch the standard deduction for MFJ with Blind status
@@ -141,7 +141,7 @@ public class DeductionMetadataControllerTest {
     Assert.areEqual(
       1550,
       mfjBlindDeductionAmount,
-      'MFJ Blind deduction amount should be $1,550.'
+      'MFJ BL deduction amount should be 1550'
     );
 
     // Fetch the standard deduction for MFJ with Senior status
@@ -157,7 +157,7 @@ public class DeductionMetadataControllerTest {
     Assert.areEqual(
       3100,
       mfjSeniorDeductionAmount,
-      'MFJ Blind and Senior deduction amount should be $3,100.'
+      'MFJ BL SR deduction amount should be 3100.'
     );
 
     // Test HOH deduction
@@ -173,7 +173,7 @@ public class DeductionMetadataControllerTest {
     Assert.areEqual(
       21900,
       hohDeductionAmount,
-      'HOH deduction amount should be $21,900.'
+      'HOH deduction amount should be 21900.'
     );
 
     Test.stopTest();
@@ -198,7 +198,7 @@ public class DeductionMetadataControllerTest {
     Assert.areEqual(
       3100,
       mfjBlindSeniorDeductionAmount,
-      'MFJ deduction amount for Blind and Senior should be $3,100.'
+      'MFJ deduction amount for BL SR should be 3100.'
     );
 
     // Test for Married Filing Jointly (MFJ) Blind only
@@ -214,7 +214,7 @@ public class DeductionMetadataControllerTest {
     Assert.areEqual(
       1550,
       mfjBlindDeductionAmount,
-      'MFJ deduction amount for Blind only should be $1,550.'
+      'MFJ deduction amount for BL should be 1550.'
     );
 
     Test.stopTest();
