@@ -2,9 +2,10 @@
  * @description       :
  * @author            : admillican08@gmail.com
  * @group             :
- * @last modified on  : 09-23-2024
+ * @last modified on  : 09-24-2024
  * @last modified by  : admillican08@gmail.com
  **/
+
 public with sharing class JoobleCallout {
   public static final String OBJ_NAME = 'Position';
   public static final string CLS_NAME = 'JoobleCallout';
@@ -12,10 +13,12 @@ public with sharing class JoobleCallout {
   @future(callout=true)
   public static void createNewPositionsFromJooble() {
     final String MTD_NAME = 'createNewPositionsFromJooble';
+    List<Position__c> newPosnLst = new List<Position__c>();
     String apiKey = [
       SELECT MasterLabel, Value__c
       FROM Api_Key__mdt
       WHERE MasterLabel = 'Jooble'
+      WITH USER_MODE
       LIMIT 1
     ]
     .Value__c;
@@ -32,28 +35,18 @@ public with sharing class JoobleCallout {
     Http http = new Http();
     HttpResponse response = http.send(request);
     // If the HTTP response code is successful
-
     if (response.getStatusCode() == 200) {
       String jsonStr = response.getBody();
       jsonStr = removeExtraneous(jsonStr);
       Dump__c newDump = new Dump__c(Text__c = jsonStr);
       insert newDump;
-
       JSONParser parser = JSON.createParser(jsonStr);
-      List<Position__c> newPosnLst = new List<Position__c>();
-      parser.nextToken();
-      parser.nextToken();
-      while (parser.nextToken() != null) {
-        Position__c newPosn = new Position__c();
-        newPosn = createPosition(parser, newPosn);
-        newPosnLst.add(newPosn);
-      }
+      List<JPosition> jPosLst = parseJson(jsonStr, parser);
+      newPosnLst = createPositions(jPosLst, newPosnLst);
       newPosnLst = removeUpdateExistingPositions(newPosnLst);
       newPosnLst = matchAcctsToCompanies(newPosnLst);
       List<Account> newAccts = createNewAcctsForCompanies(newPosnLst);
-      Util_Insert.insertList(OBJ_NAME, newAccts, MTD_NAME + ' of ' + CLS_NAME);
       newPosnLst = matchAcctsToCompanies(newPosnLst);
-      System.debug('**Size of Position List is ' + newPosnLst.size());
       System.debug(
         Util_Upsert.upsertList(
           OBJ_NAME,
@@ -64,60 +57,62 @@ public with sharing class JoobleCallout {
     }
   }
 
-  @testVisible
-  private static Position__c createPosition(
-    JsonParser parser,
-    Position__c posn
-  ) {
-    final String MTH_NAME = 'createPosition';
-    if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
-      try {
-        switch on parser.getText() {
-          when 'title' {
-            parser.nextValue();
-            posn.Title__c = parser.getText();
-          }
-          when 'location' {
-            parser.nextValue();
-            posn.Geographic_Job_Location__c = parser.getText();
-          }
-          when 'snippet' {
-            parser.nextValue();
-            posn.Position_Description__c = parser.getText();
-          }
-          when 'salary' {
-            parser.nextValue();
-            try {
-              posn.Salary__c = Decimal.valueOf(parser.getText());
-            } catch (TypeException te) {
-              posn.Salary__c = null;
-            }
-          }
-          when 'source' {
-            parser.nextValue();
-            posn.Source__c = parser.getText();
-          }
-          when 'type' {
-            parser.nextValue();
-            posn.Time_Type__c = parser.getText();
-          }
-          when 'link' {
-            parser.nextValue();
-            posn.Position_Link__c = parser.getText();
-          }
-          when 'company' {
-            parser.nextValue();
-            posn.Company_Name__c = parser.getText();
-          }
-          when 'updated' {
-            parser.nextValue();
-            posn.Reported_Last_Updated__c = parser.getDateTimeValue();
-          }
-          when 'id' {
-            parser.nextValue();
-            posn.External_System_Id__c = parser.getText();
+  public class JPosition {
+    public String title;
+    public String location;
+    public String snippet;
+    public Decimal salary;
+    public String source;
+    public String type;
+    public String link;
+    public String company;
+    public DateTime updated;
+    public String id;
+  }
+
+  public static List<JPosition> parseJson(String jsonStr, JSONParser parser) {
+    List<JPosition> jPosLst = new List<JPosition>();
+    while (parser.nextToken() != null) {
+      // Start at the array of jobs
+      if (parser.getCurrentToken() == JSONToken.START_ARRAY) {
+        while (parser.nextToken() != null) {
+          // Advance to the job object
+          if (parser.getCurrentToken() == JSONToken.START_OBJECT) {
+            System.debug('**About to read values');
+            JPosition jooblePos = (JPosition) parser.readValueAs(
+              JPosition.class
+            );
+            jPosLst.add(jooblePos);
           }
         }
+      }
+    }
+    return jPosLst;
+  }
+
+  @testVisible
+  private static List<Position__c> createPositions(
+    List<JPosition> jPosnLst,
+    List<Position__c> newPosnLst
+  ) {
+    for (JPosition jooblePos : jPosnLst) {
+      Position__c posn = new Position__c();
+      final String MTH_NAME = 'createPosition';
+      try {
+        posn.Title__c = jooblePos?.title ?? 'No Title Provided';
+        posn.Geographic_Job_Location__c = jooblePos?.location ??
+          'United States';
+        posn.Position_Description__c = jooblePos?.snippet ??
+          'No Description Provided';
+        posn.Salary__c = jooblePos?.salary;
+        posn.Source__c = jooblePos?.source;
+        posn.Time_Type__c = jooblePos?.type;
+        posn.Position_Link__c = jooblePos?.link;
+        posn.Company_Name__c = jooblePos?.company;
+        posn.Reported_Last_Updated__c = jooblePos?.updated;
+        posn.External_System_Id__c = jooblePos?.id;
+        posn.Position_Status__c = 'Open';
+        newPosnLst.add(posn);
       } catch (Exception ex) {
         String insDetails =
           'Method: ' +
@@ -143,11 +138,34 @@ public with sharing class JoobleCallout {
         );
       }
     }
-    return posn;
+    return newPosnLst;
   }
+
   private static List<Position__c> matchAcctsToCompanies(
     List<Position__c> posnLst
   ) {
+    List<Account> acctsMatchingNames = queryForAcctsMatchingCompanyNames(
+      posnLst
+    );
+    if (!acctsMatchingNames.isEmpty()) {
+      for (Position__c postn : posnLst) {
+        for (Account acct : acctsMatchingNames) {
+          if (
+            acct.Name.equals(postn.Company_Name__c) && postn.Company__c == null
+          ) {
+            postn.Company__c = acct.Id;
+            break;
+          }
+        }
+      }
+    }
+    return posnLst;
+  }
+
+  private static List<Account> queryForAcctsMatchingCompanyNames(
+    List<Position__c> posnLst
+  ) {
+    List<Account> acctsMatchingNames = new List<Account>();
     String qry = 'SELECT Id, Name FROM Account WHERE Name IN (';
     Integer counter = 0;
     for (Position__c posn : posnLst) {
@@ -161,32 +179,31 @@ public with sharing class JoobleCallout {
     qry += ')';
     system.debug('**query: ' + qry);
     if (counter > 0) {
-      List<Account> acctLst = Database.query(qry, AccessLevel.USER_MODE);
-
-      for (Position__c postn : posnLst) {
-        for (Account acct : acctLst) {
-          if (
-            acct.Name.equals(postn.Company_Name__c) && postn.Company__c == null
-          ) {
-            postn.Company__c = acct.Id;
-            break;
-          }
-        }
-      }
+      acctsMatchingNames = Database.query(qry, AccessLevel.USER_MODE);
     }
-    return posnLst;
+    return acctsMatchingNames;
   }
 
   @testVisible
   private static List<Account> createNewAcctsForCompanies(
     List<Position__c> posnLst
   ) {
+    final String MTD_NAME = 'createNewAcctsForCompanies';
     List<Account> newAccounts = new List<Account>();
     for (Position__c posn : posnLst) {
-      if (posn.Company__c == null) {
+      if (posn.Company__c == null && posn.Company_Name__c != null) {
         Account newAcct = new Account(name = posn.Company_Name__c);
+        System.debug('**New account: ' + newAcct.name);
+        newAccounts.add(newAcct);
       }
     }
+    System.debug(
+      Util_Insert.insertList(
+        'Account',
+        newAccounts,
+        MTD_NAME + ' of ' + CLS_NAME
+      )
+    );
     return newAccounts;
   }
 
@@ -240,6 +257,44 @@ public with sharing class JoobleCallout {
     return posnLst;
   }
 
+  /*
+public with sharing class JoobleCallout {
+  public static final String OBJ_NAME = 'Position';
+  public static final string CLS_NAME = 'JoobleCallout';
+
+  @future(callout=true)
+  public static void createNewPositionsFromJooble() {
+    final String MTD_NAME = 'createNewPositionsFromJooble';
+    List<Position__c> newPosnLst = new List<Position__c>();
+    String apiKey = [
+      SELECT MasterLabel, Value__c
+      FROM Api_Key__mdt
+      WHERE MasterLabel = 'Jooble'
+      WITH USER_MODE
+      LIMIT 1
+    ]
+    .Value__c;
+    String keywordStr = '{ keywords: \'Salesforce\', location: \'United States\'}';
+    // Create HTTP request to send.
+    HttpRequest request = new HttpRequest();
+    // Set the endpoint URL. Use direct URL or for best practices use Named Credential.
+    request.setEndpoint('callout:Jooble' + '/' + apiKey);
+    request.setHeader('Content-type', 'application/json');
+    // Set the HTTP method to POST.
+    request.setMethod('POST');
+    request.setBody(keyWordStr);
+    // Send the HTTP request and get the response.
+    Http http = new Http();
+    HttpResponse response = http.send(request);
+    // If the HTTP response code is successful
+    if (response.getStatusCode() == 200) {
+      String jsonStr = response.getBody();
+      jsonStr = removeExtraneous(jsonStr);
+      Dump__c newDump = new Dump__c(Text__c = jsonStr);
+      insert newDump;
+    }
+  }
+*/
   @testVisible
   private static String removeExtraneous(String input) {
     input = input.replaceAll('\\\\[a-z]', '');
@@ -249,6 +304,11 @@ public with sharing class JoobleCallout {
     input = input.replaceAll('</*[a-z]>', '');
     input = input.replaceAll('\\.0{7}', '');
     input = input.replaceAll('"id":-', '"id":');
+    input = input.replaceAll('"salary":""', '"salary":"0.00"');
+    input = input.replaceAll(
+      '^\\{"totalCount":[0-9]+,"jobs":\\[',
+      '\\{"jobs":['
+    );
     return input;
   }
 }
