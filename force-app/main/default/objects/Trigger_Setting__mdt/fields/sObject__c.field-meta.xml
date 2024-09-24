@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>sObject__c</fullName>
+    <description>The sObject affected by the trigger</description>
+    <fieldManageability>SubscriberControlled</fieldManageability>
+    <inlineHelpText>The sObject affected by the trigger</inlineHelpText>
+    <label>sObject</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Account</fullName>
+                <default>true</default>
+                <label>Account</label>
+            </value>
+            <value>
+                <fullName>Contact</fullName>
+                <default>false</default>
+                <label>Contact</label>
+            </value>
+            <value>
+                <fullName>Opportunity</fullName>
+                <default>false</default>
+                <label>Opportunity</label>
+            </value>
+            <value>
+                <fullName>Job_Application__c</fullName>
+                <default>false</default>
+                <label>Job_Application__c</label>
+            </value>
+            <value>
+                <fullName>Job_Application_Note__c</fullName>
+                <default>false</default>
+                <label>Job_Application_Note__c</label>
+            </value>
+            <value>
+                <fullName>OpportunityLineItem</fullName>
+                <default>false</default>
+                <label>OpportunityLineItem</label>
+            </value>
+            <value>
+                <fullName>Case</fullName>
+                <default>false</default>
+                <label>Case</label>
+            </value>
+            <value>
+                <fullName>Position__c</fullName>
+                <default>false</default>
+                <label>Position__c</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

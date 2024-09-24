@@ -3,7 +3,7 @@
     <fullName>Link_to_Record__c</fullName>
     <description>The link to the record involved in the exception; if a batch process threw the exception, the link to the first record processed by the batch process.W-014075</description>
     <externalId>false</externalId>
-    <formula> $CustomMetadata.Org_Variables__mdt.JobTr_Org.Org_URL__c + &apos;/&apos; +  Obj_Record_Id__c</formula>
+    <formula>$CustomMetadata.Org_Variables__mdt.JobTr_Org.Org_URL__c + &apos;/&apos; +  Obj_Record_Id__c</formula>
     <inlineHelpText>The link to the record involved in the exception; if a batch process threw the exception, the link to the first record processed by the batch process</inlineHelpText>
     <label>Link to Record</label>
     <required>false</required>

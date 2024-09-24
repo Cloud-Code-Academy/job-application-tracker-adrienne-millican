@@ -35,6 +35,7 @@ export default class takeHomePayCalc extends LightningElement {
   fedExemptValue = null;
   medExemptValue = null;
   socExemptValue = null;
+  fedTax = null;
   isSenior = null;
   isBlind = null;
   showCalculate = false;
@@ -374,22 +375,73 @@ export default class takeHomePayCalc extends LightningElement {
     return extraTaxPaid;
   }
 
-  calculateSocialSecurityTax() {
-    let ssTax = 0.0;
-    let amtTxd = this.taxableInc - this.socSecMaxVal;
-    amtTxd < 0 ? this.taxableInc : amtTxed;
-    if (!this.socExemptValue) {
-      ssTax = (this.socSecRate / 100) * amtTxd;
+  calculateSocSecTax() {
+    if (this.socExemptValue === "Y") {
+      return 0.0;
+    } else {
+      let socSecTax = 0.0;
+      if (this.taxableInc < this.socSecMaxVal) {
+        socSecTax = (this.socSecRate / 100) * this.taxableInc;
+      } else {
+        socSecTax = (this.socSecRate / 100) * this.socSecMaxVal;
+      }
+      return socSecTax;
     }
-    console.log("**ssTax value: " + ssTax);
-    return ssTax;
   }
 
   calculateMedicareTax() {
-    let mdcrTax = (this.medicareRate / 100) * this.taxableInc;
-    console.log("**medicare value: " + mdcrTax);
-    return mdcrTax;
+    if (this.medExemptValue === 'Y'){
+      return 0.0;
+    } else {
+      let mdcrTax = (this.medicareRate / 100) * this.taxableInc;
+      return mdcrTax;
+    }
   }
+
+    async calculateFederalTax(taxBracket) {
+    if (this.fedExemptValue === "Y") {
+      this.fedTax = 0.0;
+    } else {
+      let taxBrName = this.maxTaxBracket;
+      if (taxBrName !== null && taxBrName !== "") {
+        let strSize = taxBrName.length;
+        let maxInt = parseInt(taxBrName.charAt(strSize - 1));
+        let i = maxInt;
+        let currTaxRate =
+          await this.handleGetTaxRateForTaxBracketName(taxBrName);
+        let endingSal = this.taxableInc;
+        let startingSal = await this.handleGetStartingSalary(taxBrName);
+        this.fedTax = await this.calculateTaxForBlock(
+          endingSal,
+          startingSal,
+          currTaxRate
+        );
+        do {
+          i--;
+          taxBrName = taxBrName.replace(i + 1, i);
+          console.log("**taxBracketName : " + taxBrName);
+          currTaxRate = await this.handleGetTaxRateForTaxBracketName(taxBrName);
+          endingSal = await this.handleGetEndingSalary(taxBrName);
+          startingSal = await this.handleGetStartingSalary(taxBrName);
+          this.fedTax += await this.calculateTaxForBlock(
+            endingSal,
+            startingSal,
+            currTaxRate
+          );
+        } while (i > 0);
+      }
+      this.fedTax = this.fedTax - this.calculateExtraTaxPaid();
+      console.log("**Fedtax: " + this.fedTax);
+    }
+  }
+
+  calculateTaxForBlock(endingSal, startingSal, taxRate) {
+    let taxPercent = taxRate / 100;
+    let block = endingSal - startingSal;
+    let tax = taxPercent * block;
+    return tax;
+  }
+
   handleGetMaxTaxBracketName() {
     getTaxBracketName({
       filingStatusVal: this.filingStatusVal,
@@ -434,70 +486,18 @@ export default class takeHomePayCalc extends LightningElement {
   }
 
   async handleGetTaxRateForTaxBracketName(taxBrName) {
-    try{
-        let taxBracket = await getTaxRateForTaxBracketName({
-      taxBrName: taxBrName,
-      currYr: this.currYr
-    });
-        console.log("**Tax rate for this bracket: " + taxBracket);
-        this.error = undefined;
-        return taxBracket;
-      }
-      catch (error){
-        console.log("**Error: " + error);
-        return;
-      }
-  }
-
- async calculateFedTaxforBracket(taxBracket) {
-    let fedTaxOwed = 0.0;
-    let taxBrName = this.maxTaxBracket;
-    if (taxBrName !== null && taxBrName !== "") {
-      let strSize = taxBrName.length;
-      let maxInt = parseInt(taxBrName.charAt(strSize - 1));
-      console.log("**maxInt value: " + maxInt);
-      let i = maxInt;
-      let currTaxRate = await this.handleGetTaxRateForTaxBracketName(taxBrName);
-      let endingSal = this.taxableInc;
-      let startingSal = await this.handleGetStartingSalary(taxBrName);
-      fedTaxOwed = await this.calculateTaxForBlock(
-        endingSal,
-        startingSal,
-        currTaxRate
-      );
-
-      do {
-        i--;
-        taxBrName = taxBrName.replace(i + 1, i);
-        console.log("**taxBracketName : " + taxBrName);
-        currTaxRate = await this.handleGetTaxRateForTaxBracketName(taxBrName);
-        endingSal = await this.handleGetEndingSalary(taxBrName);
-        startingSal = await this.handleGetStartingSalary(taxBrName);
-        fedTaxOwed += await this.calculateTaxForBlock(
-          endingSal,
-          startingSal,
-          currTaxRate
-        );
-        console.log("**endingSal in calcFedTax: " + endingSal);
-        console.log("**startingSal in calcFedTax: " + startingSal);
-        console.log("**taxRate in calcFedTax: " + currTaxRate);
-        console.log("**FedTaxOwed: " + fedTaxOwed);
-      } while (i > 0);
+    try {
+      let taxBracket = await getTaxRateForTaxBracketName({
+        taxBrName: taxBrName,
+        currYr: this.currYr
+      });
+      console.log("**Tax rate for this bracket: " + taxBracket);
+      this.error = undefined;
+      return taxBracket;
+    } catch (error) {
+      console.log("**Error: " + error);
+      return;
     }
-    return fedTaxOwed - this.calculateExtraTaxPaid();
-  }
-
-  calculateTaxForBlock(endingSal, startingSal, taxRate) {
-    console.log("**endingSal in calcTaxForBlock: " + endingSal);
-    console.log("**startingSal in calcTaxForBlock: " + startingSal);
-    console.log("**taxRate in calcTaxForBlock: " + taxRate);
-    let taxPercent = taxRate / 100;
-    console.log("**taxPercent: " + taxPercent);
-    let block = endingSal - startingSal;
-    console.log("**Block Amt: " + block);
-    let tax = taxPercent * block;
-    console.log("**tax: " + tax);
-    return tax;
   }
 
   async handleClick(event) {
@@ -507,7 +507,6 @@ export default class takeHomePayCalc extends LightningElement {
       this.calculateGrossHourlySalary();
     }
 
-    let fedTax = await this.calculateFedTaxforBracket(this.extraTax);
-    console.log("**Fedtax value: " + fedTax);
+    this.calculateFederalTax(this.extraTax);
   }
 }

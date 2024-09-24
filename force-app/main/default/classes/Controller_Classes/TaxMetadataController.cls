@@ -2,7 +2,7 @@
  * @description       :
  * @author            : admillican08@gmail.com
  * @group             :
- * @last modified on  : 09-22-2024
+ * @last modified on  : 09-23-2024
  * @last modified by  : admillican08@gmail.com
  **/
 public with sharing class TaxMetadataController {
@@ -40,6 +40,7 @@ public with sharing class TaxMetadataController {
         System.debug('**Found match on ' + taxBracket.developername);
         taxBrName = taxBracket.masterLabel;
         System.debug('**Returning taxBracketName of ' + taxBrName);
+        return taxBrName;
       }
     }
 
@@ -65,6 +66,7 @@ public with sharing class TaxMetadataController {
         );
         startingSal = (Decimal) taxBracket.Starting_Salary__c;
         System.debug('**Returning starting salary match of ' + startingSal);
+        return startingSal;
       }
     }
 
@@ -88,6 +90,7 @@ public with sharing class TaxMetadataController {
         System.debug('**Found ending sal match on ' + taxBracket.developername);
         endingSal = (Decimal) taxBracket.Ending_Salary__c;
         System.debug('**Returning ending salary match of ' + endingSal);
+        return endingSal;
       }
     }
 
@@ -111,6 +114,7 @@ public with sharing class TaxMetadataController {
         System.debug('**Found tax Rate match on ' + taxBracket.developername);
         taxRate = Decimal.valueOf(taxBracket.Tax_Rate__c);
         System.debug('**Returning rate of ' + taxRate);
+        return taxRate;
       }
     }
 
