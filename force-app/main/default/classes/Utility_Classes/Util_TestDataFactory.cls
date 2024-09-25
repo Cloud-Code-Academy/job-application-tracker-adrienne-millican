@@ -2,7 +2,7 @@
  * @description       :
  * @author            : admillican08@gmail.com
  * @group             :
- * @last modified on  : 09-24-2024
+ * @last modified on  : 09-25-2024
  * @last modified by  : admillican08@gmail.com
  **/
 
@@ -154,7 +154,6 @@ public without sharing class Util_TestDataFactory {
       );
       newAccts.add(acct);
     }
-
     if (doInsert) {
       insert newAccts;
     }
