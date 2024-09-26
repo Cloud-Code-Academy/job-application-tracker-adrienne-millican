@@ -363,13 +363,13 @@ export default class takeHomePayCalc extends LightningElement {
   calculateYearlyPretaxDeductions() {
     const yrlyPretaxDeduct = this.addtlPretaxDeductAmt * this.timesPerYear;
     console.log("**yrlyPretaxDeductionAmt: " + yrlyPretaxDeduct);
-    return yrlyPretaxDeduct;
+    return Math.round(yrlyPretaxDeduct);
   }
 
   calculateYearlyPosttaxDeductions() {
     const yrlyPosttaxDeduct = this.addtlPosttaxDeductAmt * this.timesPerYear;
-    console.log("**yrlyPosttaxDeductionAmt: " + yrlyPosttaxDeduc);
-    return yrlyPosttaxDeduct;
+    console.log("**yrlyPosttaxDeductionAmt: " + yrlyPosttaxDeduct);
+    return Math.round(yrlyPosttaxDeduct);
   }
 
   calculateYearlyTaxableIncome() {
@@ -396,7 +396,7 @@ export default class takeHomePayCalc extends LightningElement {
     if (this.socExemptValue === "Y") {
       return 0.0;
     } else {
-      let socSecTax = 0.0;
+      let socSecTax = 0.0; 
       if (this.yrlyTaxableInc < this.socSecMaxVal) {
         socSecTax = (this.socSecRate / 100) * this.yrlyTaxableInc;
       } else {
@@ -416,8 +416,9 @@ export default class takeHomePayCalc extends LightningElement {
   }
 
   async calculateYrlyFederalTax() {
+    let federalTax = 0.0;
     if (this.fedExemptValue === "Y") {
-      this.fedTax = 0.0;
+      return federalTax;
     } else {
       let taxBrName = this.maxTaxBracket;
       if (taxBrName !== null && taxBrName !== "") {
@@ -428,7 +429,7 @@ export default class takeHomePayCalc extends LightningElement {
           await this.handleGetTaxRateForTaxBracketName(taxBrName);
         let endingSal = this.yrlyTaxableInc;
         let startingSal = await this.handleGetStartingSalary(taxBrName);
-        this.fedTax = await this.calculateTaxForBlock(
+        federalTax = await this.calculateTaxForBlock(
           endingSal,
           startingSal,
           currTaxRate
@@ -436,29 +437,29 @@ export default class takeHomePayCalc extends LightningElement {
         do {
           i--;
           taxBrName = taxBrName.replace(i + 1, i);
-          console.log("**taxBracketName : " + taxBrName);
+          //console.log("**taxBracketName : " + taxBrName);
           currTaxRate = await this.handleGetTaxRateForTaxBracketName(taxBrName);
           endingSal = await this.handleGetEndingSalary(taxBrName);
           startingSal = await this.handleGetStartingSalary(taxBrName);
-          this.fedTax += await this.calculateTaxForBlock(
+          federalTax += await this.calculateTaxForBlock(
             endingSal,
             startingSal,
             currTaxRate
           );
         } while (i > 0);
       }
-      this.fedTax = Math.round(this.fedTax - this.calculateExtraFedTaxPaid());
-      console.log("**Fedtax: " + this.fedTax);
+      //console.log('**Local variable federalTax: ' + federalTax);
+      return Math.round(federalTax - this.calculateExtraFedTaxPaid());
     }
   }
 
   calculateTaxForBlock(endingSal, startingSal, taxRate) {
     let taxPercent = taxRate / 100;
-    console.log("**Tax percent " + taxPercent);
+    //console.log("**Tax percent " + taxPercent);
     let block = endingSal - startingSal;
-    console.log("**Amount for block " + block);
+   // console.log("**Amount for block " + block);
     let tax = taxPercent * block;
-    console.log("**Tax for block: " + tax);
+    //console.log("**Tax for block: " + tax);
     return tax;
   }
 
@@ -484,7 +485,7 @@ export default class takeHomePayCalc extends LightningElement {
         taxBrName: taxBrName,
         currYr: this.currYr
       });
-      console.log("**Starting salary value: " + startingSal);
+      //console.log("**Starting salary value: " + startingSal);
       return startingSal;
     } catch (error) {
       console.log("**Error: " + error);
@@ -498,7 +499,7 @@ export default class takeHomePayCalc extends LightningElement {
         taxBrName: taxBrName,
         currYr: this.currYr
       });
-      console.log("**Ending salary value: " + endingSal);
+      //console.log("**Ending salary value: " + endingSal);
       return endingSal;
     } catch (error) {
       console.log("**Error: " + error);
@@ -512,7 +513,7 @@ export default class takeHomePayCalc extends LightningElement {
         taxBrName: taxBrName,
         currYr: this.currYr
       });
-      console.log("**Tax rate for this bracket: " + taxBracket);
+      //console.log("**Tax rate for this bracket: " + taxBracket);
       this.error = undefined;
       return taxBracket;
     } catch (error) {
@@ -521,18 +522,32 @@ export default class takeHomePayCalc extends LightningElement {
     }
   }
 
-  async handleClick(event) {
-    this.calculateYearlyTaxableIncome();
+  async calculateYearlyTaxBurden(){
+    let tax = 0.0;
+    try{
+      this.fedTax = await this.calculateYrlyFederalTax();
+      console.log('**Yrly federal tax: ' + this.fedTax);
+      this.error = undefined;
+    } catch (error){
+      this.error = error;
+      console.log('**Error: ' + error);
+    }
     const medTax = this.calculateYrlyMedicareTax();
     console.log("**Medicare tax: " + medTax);
     const socSecTax = this.calculateYrlySocSecTax();
     console.log("**Soc Sec tax: " + socSecTax);
-     this.calculateYrlyFederalTax();
-    const tax = this.fedTax + medTax + socSecTax;
+    tax = this.fedTax + medTax + socSecTax;
+    return tax;
+  }
+  
+  
+  async handleClick(event) {
+    this.calculateYearlyTaxableIncome();
+    const yrlyTax = await this.calculateYearlyTaxBurden();
     const takeHomeSal =
-      this.salAmt - this.yrlyPretaxDeduct - this.yrlyPosttaxDeduc - tax;
-      console.log('**yearly take home salary: ' + takeHomeSal);
-    this.takeHomePay = takeHomeSal / this.payFrequencyVal;
+      this.salAmt -  this.calculateYearlyPretaxDeductions()- this.calculateYearlyPosttaxDeductions() - yrlyTax;
+    console.log('**yearly take home salary: ' + takeHomeSal);
+    this.takeHomePay = takeHomeSal / this.timesPerYear;
     console.log('**Periodic takeHomePay: ' + this.takeHomePay);
   }
 }
