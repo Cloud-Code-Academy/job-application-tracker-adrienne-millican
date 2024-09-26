@@ -35,16 +35,20 @@ export default class takeHomePayCalc extends LightningElement {
   currYr = 0;
   timesPerYear = 0;
   takeHomePay = 0.0;
+  fedTax = null;
+  socSecTax = null;
+  medTax = null;
+  grossSalDiv = null;
   fedExemptValue = null;
   medExemptValue = null;
   socExemptValue = null;
-  fedTax = null;
   isSenior = null;
   isBlind = null;
   showCalculate = false;
   showSalaried = false;
   showHourly = false;
   hasFilingStatus = false;
+
 
   @wire(getRecord, { recordId: "$recordId", fields: FIELDS })
   loadFields({ error, data }) {
@@ -320,9 +324,16 @@ export default class takeHomePayCalc extends LightningElement {
 
   calculateGrossYrlyHourlySalary = () => {
     this.salAmt = parseFloat(this.hrsWkd * this.hrlyRate * this.timesPerYear);
+    this.salAmt = this.salAmt.toFixed(2);
     console.log("**Gross salamt amt for hourly: " + this.salAmt);
-    return this.salAmt;
   };
+
+   calculateGrossSalaryDivided = () => {
+    this.grossSalDiv = (this.salAmt/this.timesPerYear);
+    this.grossSalDiv = this.grossSalDiv.toFixed(2);
+    console.log("**Gross salary amount divided: " + this.grossSalDiv);
+  };
+
 
   convertPayFrequencyToNumberPerYear() {
     switch (this.payFrequencyVal) {
@@ -353,35 +364,27 @@ export default class takeHomePayCalc extends LightningElement {
     console.log("**timesPerYear: " + this.timesPerYear);
   }
 
-  calculateAmountPerPayPeriod(grossAmt) {
-    let payPeriodAmt = 0;
-    payPeriodAmt = grossAmt / this.convertPayFrequencyToNumberPerYear();
-    console.log("**PayPeriodAmt: " + payPeriodAmt);
-    return payPeriodAmt;
-  }
 
   calculateYearlyPretaxDeductions() {
     const yrlyPretaxDeduct = this.addtlPretaxDeductAmt * this.timesPerYear;
-    console.log("**yrlyPretaxDeductionAmt: " + yrlyPretaxDeduct);
-    return Math.round(yrlyPretaxDeduct);
+    console.log("**yrlyPretaxDeductionAmt: " + yrlyPretaxDeduct.toFixed(2));
+    return yrlyPretaxDeduct.toFixed(2);
   }
 
   calculateYearlyPosttaxDeductions() {
     const yrlyPosttaxDeduct = this.addtlPosttaxDeductAmt * this.timesPerYear;
     console.log("**yrlyPosttaxDeductionAmt: " + yrlyPosttaxDeduct);
-    return Math.round(yrlyPosttaxDeduct);
+    return yrlyPosttaxDeduct.toFixed(2);
   }
 
   calculateYearlyTaxableIncome() {
     if (this.salAmt === null && this.howPaidVal === "Hourly") {
       this.calculateGrossYrlyHourlySalary();
     }
-    const deduct = this.handleItemizedDeduction();
-    const preTax = this.calculateYearlyPretaxDeductions();
+    console.log('**salAmt from calculateYrlyTaxableIncome: ' + this.salAmt);
+    const deduct = parseFloat(this.handleItemizedDeduction());
+    const preTax = parseFloat(this.calculateYearlyPretaxDeductions());
     this.yrlyTaxableInc = Math.round(this.salAmt + this.addtlIncome - (deduct + preTax));
-    console.log(
-      "**Taxable income from calculateTaxableIncome: " + this.yrlyTaxableInc
-    );
   }
 
   calculateExtraFedTaxPaid() {
@@ -457,7 +460,7 @@ export default class takeHomePayCalc extends LightningElement {
     let taxPercent = taxRate / 100;
     //console.log("**Tax percent " + taxPercent);
     let block = endingSal - startingSal;
-   // console.log("**Amount for block " + block);
+    //console.log("**Amount for block " + block);
     let tax = taxPercent * block;
     //console.log("**Tax for block: " + tax);
     return tax;
@@ -532,22 +535,23 @@ export default class takeHomePayCalc extends LightningElement {
       this.error = error;
       console.log('**Error: ' + error);
     }
-    const medTax = this.calculateYrlyMedicareTax();
-    console.log("**Medicare tax: " + medTax);
-    const socSecTax = this.calculateYrlySocSecTax();
-    console.log("**Soc Sec tax: " + socSecTax);
-    tax = this.fedTax + medTax + socSecTax;
+    this.medTax = this.calculateYrlyMedicareTax();
+    console.log("**Medicare tax: " + this.medTax);
+    this.socSecTax = this.calculateYrlySocSecTax();
+    console.log("**Soc Sec tax: " + this. socSecTax);
+    tax = this.fedTax + this.medTax + this.socSecTax;
     return tax;
   }
   
   
   async handleClick(event) {
+    this.calculateGrossSalaryDivided();
     this.calculateYearlyTaxableIncome();
-    const yrlyTax = await this.calculateYearlyTaxBurden();
-    const takeHomeSal =
-      this.salAmt -  this.calculateYearlyPretaxDeductions()- this.calculateYearlyPosttaxDeductions() - yrlyTax;
-    console.log('**yearly take home salary: ' + takeHomeSal);
-    this.takeHomePay = takeHomeSal / this.timesPerYear;
-    console.log('**Periodic takeHomePay: ' + this.takeHomePay);
+    const yrlyTax = (await this.calculateYearlyTaxBurden()).toFixed(2);
+    const yrlyTakeHome = this.salAmt - yrlyTax - this.calculateYearlyPretaxDeductions() - - this.calculateYearlyPosttaxDeductions();
+    this.socSecTax = (this.socSecTax/this.timesPerYear).toFixed(2);
+    this.medTax = (this.medTax/this.timesPerYear).toFixed(2);
+    this.fedTax = (this.fedTax/this.timesPerYear).toFixed(2);
+    this.takeHomePay = (yrlyTakeHome/this.timesPerYear).toFixed(2);
   }
 }

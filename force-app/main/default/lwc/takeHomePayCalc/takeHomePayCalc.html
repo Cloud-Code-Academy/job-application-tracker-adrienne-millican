@@ -2,7 +2,7 @@
   @description       : 
   @author            : admillican08@gmail.com
   @group             : 
-  @last modified on  : 09-25-2024
+  @last modified on  : 09-26-2024
   @last modified by  : admillican08@gmail.com
 -->
 <template>
@@ -239,27 +239,72 @@
       </template>
     </lightning-tabset>
 
+    <!--Process-->
 
-  <!--Process-->
-       
-<template lwc:if={showCalculate}>
-    <div class="slds-m-top_small">
-      <div class="slds-m-left_small">
-        <lightning-button
-          class="slds-m-top_small"
-          variant="brand"
-          label="Calculate"
-          title="Calculate"
-          onclick={handleClick}
-        ></lightning-button>
+    <template lwc:if={showCalculate}>
+      <div class="slds-m-top_small">
+        <div class="slds-m-left_small">
+          <lightning-button
+            class="slds-m-top_small"
+            variant="brand"
+            label="Calculate"
+            title="Calculate"
+            onclick={handleClick}
+          ></lightning-button>
+        </div>
       </div>
-
-      <!--Display results-->
+    </template>
+    <!--Display results-->
+    <template lwc:if={takeHomePay}>
       <div class="slds-text-align_left">
         <div slot="footer" class="resultText">
           <p>
             <span class="slds-m-bottom_small"
-              >Take Home Pay Amount: &nbsp;
+              >Gross Salary Amount for Period: &nbsp;
+              <span class="slds-text-color_success"
+                ><lightning-formatted-number
+                  value={grossSalDiv}
+                  format-style="currency"
+                  currency-code="USD"
+                ></lightning-formatted-number></span
+            ></span>
+          </p>
+          <p>
+            <span class="slds-m-bottom_small"
+              >Federal Income Tax Paid for Period: &nbsp;
+              <span class="slds-text-color_success"
+                ><lightning-formatted-number
+                  value={fedTax}
+                  format-style="currency"
+                  currency-code="USD"
+                ></lightning-formatted-number></span
+            ></span>
+          </p>
+          <p>
+            <span class="slds-m-bottom_small"
+              >Social Security Tax Paid for Period: &nbsp;
+              <span class="slds-text-color_success"
+                ><lightning-formatted-number
+                  value={socSecTax}
+                  format-style="currency"
+                  currency-code="USD"
+                ></lightning-formatted-number></span
+            ></span>
+          </p>
+          <p>
+            <span class="slds-m-bottom_small"
+              >Medicare Tax Paid for Period: &nbsp;
+              <span class="slds-text-color_success"
+                ><lightning-formatted-number
+                  value={medTax}
+                  format-style="currency"
+                  currency-code="USD"
+                ></lightning-formatted-number></span
+            ></span>
+          </p>
+          <p>
+            <span class="slds-m-bottom_small"
+              >Take Home Pay Amount for Period: &nbsp;
               <span class="slds-text-color_success"
                 ><lightning-formatted-number
                   value={takeHomePay}
@@ -270,8 +315,6 @@
           </p>
         </div>
       </div>
-    </div>
+    </template>
+  </lightning-card>
 </template>
-</lightning-card>
-</template>
-
