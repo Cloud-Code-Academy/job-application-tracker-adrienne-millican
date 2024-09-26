@@ -11,7 +11,7 @@ public with sharing class JobApplicationCreatorBatch implements Database.Batchab
 
   public Database.QueryLocator start(Database.BatchableContext bc) {
     return Database.getQueryLocator(
-      'SELECT Id, Company__c, Job_Location__c, Position_Description__c, Position_Link__c, Salary__c, Reported_Last_Updated__c, (SELECT Id, Position__c, Position_Reported_Last_Updated__c FROM Job_Applications__r) FROM Position__c WHERE (CreatedDate = TODAY OR LastModifiedDate = TODAY) WITH USER_MODE'
+      'SELECT Id, Company__c, Job_Location__c, How_Paid__c, Position_Description__c, Position_Link__c, Salary__c, Reported_Last_Updated__c, (SELECT Id, Position__c, Position_Reported_Last_Updated__c FROM Job_Applications__r) FROM Position__c WHERE (CreatedDate = TODAY OR LastModifiedDate = TODAY) WITH USER_MODE'
     );
   }
 
@@ -23,11 +23,9 @@ public with sharing class JobApplicationCreatorBatch implements Database.Batchab
         Job_Application__c jApp = new Job_Application__c();
         jApp.Position__c = posn.Id;
         jApp.Company__c = posn.Company__c;
-        jApp.Job_Description__c = posn.Position_Description__c.replace(
-          '\\.\\.\\.',
-          ''
-        );
         jApp.Salary__c = posn.Salary__c;
+        jApp.How_Paid__c = posn.How_Paid__c;
+        jApp.Job_Description__c = posn.Position_Description__c;
         jApp.Position_Reported_Last_Updated__c = posn.Reported_Last_Updated__c;
         jobAppLst.add(jApp);
       } else {
@@ -36,12 +34,11 @@ public with sharing class JobApplicationCreatorBatch implements Database.Batchab
             posn.Reported_Last_Updated__c <
             jobApp.Position_Reported_Last_Updated__c
           ) {
+            jobApp.Position__c = posn.Id;
             jobApp.Company__c = posn.Company__c;
-            jobApp.Job_Description__c = posn.Position_Description__c.replace(
-              '\\.\\.\\.',
-              ''
-            );
             jobApp.Salary__c = posn.Salary__c;
+            jobApp.How_Paid__c = posn.How_Paid__c;
+            jobApp.Job_Description__c = posn.Position_Description__c;
             jobApp.Position_Reported_Last_Updated__c = posn.Reported_Last_Updated__c;
             jobAppLst.add(jobApp);
           }
