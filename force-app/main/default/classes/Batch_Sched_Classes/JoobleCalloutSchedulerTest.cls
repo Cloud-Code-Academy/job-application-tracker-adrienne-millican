@@ -8,7 +8,7 @@
 @IsTest
 public class JoobleCalloutSchedulerTest {
   @IsTest
-  static void testSchedulerExecutesSuccessfully() {
+  static void testJoobleSchedulerExecutesSuccessfully() {
     // Set up mock callout to simulate the web service
     Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator());
 
