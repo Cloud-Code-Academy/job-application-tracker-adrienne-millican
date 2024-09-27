@@ -2,7 +2,7 @@
  * @description       :
  * @author            : admillican08@gmail.com
  * @group             :
- * @last modified on  : 09-25-2024
+ * @last modified on  : 09-27-2024
  * @last modified by  : admillican08@gmail.com
  **/
 
@@ -271,11 +271,11 @@ public without sharing class Util_TestDataFactory {
           Email = fname + '.' + lname + '@' + emailDom,
           OwnerId = acct.OwnerId,
           Title = title,
-          MailingStreet = acct.BillingStreet,
-          MailingCity = acct.BillingCity,
-          MailingState = acct.BillingState,
-          MailingPostalCode = acct.BillingPostalCode,
-          MailingCountry = acct.BillingCountry
+          MailingStreet = acct?.BillingStreet,
+          MailingCity = acct?.BillingCity,
+          MailingState = acct?.BillingState,
+          MailingPostalCode = acct?.BillingPostalCode,
+          MailingCountry = acct?.BillingCountry
         );
         newContacts.add(contct);
       }
@@ -388,7 +388,7 @@ public without sharing class Util_TestDataFactory {
 
   public static String generatePersonName(String firstOrLast) {
     String persName = '';
-    Integer randomNum = genRandIntLessThan(25);
+    Integer randomNum = genRandIntLessThan(35);
     List<String> firstNamesLst = new List<String>{
       'Alexa',
       'Fern',
@@ -414,7 +414,17 @@ public without sharing class Util_TestDataFactory {
       'Dakota',
       'Teddie',
       'Finley',
-      'Kasey'
+      'Kasey',
+      'Hjalmar',
+      'Kasimir',
+      'Sage',
+      'Laney',
+      'Kamil',
+      'Santiago',
+      'Tobias',
+      'Einion',
+      'Heraclitus',
+      'Nanuq'
     };
     List<String> LastNamesLst = new List<String>{
       'Hargrave',
@@ -441,7 +451,17 @@ public without sharing class Util_TestDataFactory {
       'Nunnaly',
       'Novak',
       'Gigliotti',
-      'Selin'
+      'Selin',
+      'Petran',
+      'Kruse',
+      'Papke',
+      'Burch',
+      'Madsen',
+      'Gunduz',
+      'Baumann',
+      'Bausch',
+      'Sultonova',
+      'Hollister'
     };
     if (firstOrLast.startsWithIgnoreCase('f')) {
       persName = firstNamesLst[randomNum];
