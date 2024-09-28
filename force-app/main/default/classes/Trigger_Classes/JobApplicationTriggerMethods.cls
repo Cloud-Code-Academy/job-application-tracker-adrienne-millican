@@ -2,52 +2,14 @@
  * @description       :
  * @author            : admillican08@gmail.com
  * @group             :
- * @last modified on  : 09-27-2024
+ * @last modified on  : 09-28-2024
  * @last modified by  : admillican08@gmail.com
  **/
 public with sharing class JobApplicationTriggerMethods {
   public static final String OBJ_NAME = 'Job Application';
   public static final String CLS_NAME = 'JobApplicationTriggerMethods';
 
-  public String createTasksForStatus(
-    Map<Id, Job_Application__c> oldJobAppMap,
-    Map<Id, Job_Application__c> newJobAppMap
-  ) {
-    String msg = '';
-    final String MTH_NAME = 'createTasksForStatus';
-    List<Task> tskLstToUpsert = new List<Task>();
-    StaticResource taskJ = [
-      SELECT Id, Body
-      FROM StaticResource
-      WHERE Name = 'JobApplicationJson'
-      LIMIT 1
-    ];
-    String taskJStr = taskJ.Body.toString();
-    Map<String, Object> jsonMap = (Map<String, Object>) JSON.deserializeUntyped(
-      taskJStr
-    );
-    Map<String, List<String>> statusTasksMap = createTaskMapFromJson(jsonMap);
-    for (Id jobId : newJobAppMap.keySet()) {
-      Job_Application__c oldJobApp = oldJobAppMap?.get(jobId);
-      Job_Application__c newJobApp = newJobAppMap.get(jobId);
-      if (
-        oldJobApp == null ||
-        oldJobApp.Application_Status__c != newJobApp.Application_Status__c
-      ) {
-        List<String> taskLst = statusTasksMap.get(
-          newJobApp.Application_Status__c
-        );
-        tskLstToUpsert.add(createJobAppTaskFromJson(taskLst, jobId));
-      }
-    }
-    msg = Util_Upsert.upsertList(
-      'Task',
-      tskLstToUpsert,
-      MTH_NAME + ' of ' + CLS_NAME
-    );
-    return msg;
-  }
-
+  // used for afterInsert
   public String copyInfoFromPosition(Map<Id, Job_Application__c> newJobAppMap) {
     String msg = '';
     final String MTH_NAME = 'copyInfoFromPosition';
@@ -99,7 +61,179 @@ public with sharing class JobApplicationTriggerMethods {
     );
     return msg;
   }
+  // Used for afterInsert and afterUpdate
+  public String createTasksForStatus(
+    Map<Id, Job_Application__c> oldJobAppMap,
+    Map<Id, Job_Application__c> newJobAppMap
+  ) {
+    String msg = '';
+    final String MTH_NAME = 'createTasksForStatus';
+    List<Task> tskLstToUpsert = new List<Task>();
+    StaticResource taskJ = [
+      SELECT Id, Body
+      FROM StaticResource
+      WHERE Name = 'JobApplicationJson'
+      LIMIT 1
+    ];
+    String taskJStr = taskJ.Body.toString();
+    Map<String, Object> jsonMap = (Map<String, Object>) JSON.deserializeUntyped(
+      taskJStr
+    );
+    Map<String, List<String>> statusTasksMap = createTaskMapFromJson(jsonMap);
+    for (Id jobId : newJobAppMap.keySet()) {
+      Job_Application__c oldJobApp = oldJobAppMap?.get(jobId);
+      Job_Application__c newJobApp = newJobAppMap.get(jobId);
+      if (
+        oldJobApp == null ||
+        oldJobApp.Application_Status__c != newJobApp.Application_Status__c
+      ) {
+        List<String> taskLst = statusTasksMap.get(
+          newJobApp.Application_Status__c
+        );
+        tskLstToUpsert.add(createJobAppTaskFromJson(taskLst, jobId));
+      }
+    }
+    msg = Util_Upsert.upsertList(
+      'Task',
+      tskLstToUpsert,
+      MTH_NAME + ' of ' + CLS_NAME
+    );
+    return msg;
+  }
 
+  // Used for afterInsert and afterUpdate
+  public String createJobApplicationContacts(
+    Map<Id, Job_Application__c> oldJobAppMap,
+    Map<Id, Job_Application__c> newJobAppMap
+  ) {
+    String msg = '';
+    final String MTH_NAME = 'createJobApplicationContacts';
+    List<Job_Application_Contact__c> jobAppConsLst = new List<Job_Application_Contact__c>();
+    Map<Id, Id> jobApptoPrimContactMap = new Map<Id, Id>();
+    Map<Id, Job_Application__c> jobAppWithConsMap = new Map<Id, Job_Application__c>(
+      [
+        SELECT Id, (SELECT Id FROM Job_Application_Contacts__r)
+        FROM Job_Application__c
+        WHERE Id IN :newJobAppMap.keySet()
+        WITH USER_MODE
+      ]
+    );
+
+    List<Contact> consToAddLst = new List<Contact>();
+    for (Id jobId : newJobAppMap.keySet()) {
+      Job_Application__c oldJobApp = oldJobAppMap?.get(jobId);
+      Job_Application__c newJobApp = newJobAppMap.get(jobId);
+      Job_Application__c jobAppMap = jobAppWithConsMap.get(jobId);
+      if (
+        newJobApp.Company__c != null &&
+        jobAppMap.Job_Application_Contacts__r.size() == 0
+      ) {
+        consToAddLst = [
+          SELECT Id
+          FROM Contact
+          WHERE
+            AccountId = :newJobApp.Company__c
+            AND (Title LIKE 'Hiring%'
+            OR Title LIKE '%Recruiter%'
+            OR Title LIKE '%Human Resources%')
+          WITH USER_MODE
+          ORDER BY CreatedDate ASC
+        ];
+        for (Integer i = 0; i < consToAddLst.size(); i++) {
+          Job_Application_Contact__c conToAdd = new Job_Application_Contact__c(
+            Job_Application__c = jobId,
+            Contact__c = consToAddLst[i].Id
+          );
+          jobAppConsLst.add(conToAdd);
+          if (i == 0) {
+            jobAppConsLst[0].Primary_JA_Contact__c = true;
+            jobApptoPrimContactMap.put(jobId, consToAddLst[i].Id);
+          }
+        }
+      }
+    }
+
+    msg = Util_Insert.insertList(
+      'Job Application Contact',
+      jobAppConsLst,
+      MTH_NAME + ' of ' + CLS_NAME
+    );
+    if (msg.startsWith('**Inserted')) {
+      Map<Id, Job_Application__c> jobAppMap = new Map<Id, Job_Application__c>(
+        [
+          SELECT Id, Primary_Contact__c
+          FROM Job_Application__c
+          WHERE Id IN :jobApptoPrimContactMap.keySet()
+          WITH USER_MODE
+        ]
+      );
+
+      for (Id jobAppId : jobApptoPrimContactMap.keySet()) {
+        if (jobAppMap.keySet().contains(jobAppId)) {
+          jobAppMap.get(jobAppId)
+            .Primary_Contact__c = jobApptoPrimContactMap.get(jobAppId);
+        }
+      }
+      msg = Util_Upsert.upsertList(
+        'Job Application',
+        jobAppMap.values(),
+        MTH_NAME + ' of ' + CLS_NAME
+      );
+    }
+    return msg;
+  }
+
+  // Used for afterInsert and afterUpdate
+  public String createJobApplicationNotes(
+    Map<Id, Job_Application__c> oldJobAppMap,
+    Map<Id, Job_Application__c> newJobAppMap
+  ) {
+    String msg = '';
+    final String MTH_NAME = 'createJobApplicationNotes';
+    List<Job_Application_Note__c> notesLstToInsert = new List<Job_Application_Note__c>();
+    List<Job_Application__c> jobAppsToUpd = new List<Job_Application__c>();
+    for (Id jobId : newJobAppMap.keySet()) {
+      Job_Application__c oldJobApp = oldJobAppMap?.get(jobId);
+      Job_Application__c newJobApp = newJobAppMap.get(jobId);
+      if (
+        (oldJobApp == null || oldJobApp.Notes__c != newJobApp.Notes__c) &&
+        !String.isBlank(newJobApp.Notes__c)
+      ) {
+        Job_Application_Note__c newNote = new Job_Application_Note__c(
+          CreatedById = UserInfo.getUserId(),
+          Entry__c = newJobApp.Notes__c,
+          Entry_Date_Time__c = System.now(),
+          Job_Application__c = jobId
+        );
+        notesLstToInsert.add(newNote);
+        jobAppsToUpd.add(newJobApp);
+      }
+    }
+    msg = Util_Insert.insertList(
+      'Job Application Note',
+      notesLstToInsert,
+      MTH_NAME + ' of ' + CLS_NAME
+    );
+    if (msg.startsWith('**Inserted')) {
+      jobAppsToUpd = [
+        SELECT Id, Notes__c
+        FROM Job_Application__c
+        WHERE Id IN :jobAppsToUpd
+        WITH USER_MODE
+      ];
+      for (Job_Application__c jobApp : jobAppsToUpd) {
+        jobApp.Notes__c = null;
+      }
+      msg = Util_Upsert.upsertList(
+        'Job Application',
+        jobAppsToUpd,
+        MTH_NAME + ' of ' + CLS_NAME
+      );
+    }
+    return msg;
+  }
+
+  //private helper method
   @TestVisible
   private Task createJobAppTaskFromJson(List<String> taskLst, Id jobAppId) {
     Task tsk = new Task(
@@ -119,7 +253,7 @@ public with sharing class JobApplicationTriggerMethods {
     }
     return tsk;
   }
-
+  // private helper method
   @testVisible
   private Map<String, List<String>> createTaskMapFromJson(
     Map<String, Object> jsonMap
