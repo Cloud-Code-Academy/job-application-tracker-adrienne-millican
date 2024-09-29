@@ -2,7 +2,7 @@
  * @description       :
  * @author            : admillican08@gmail.com
  * @group             :
- * @last modified on  : 09-28-2024
+ * @last modified on  : 09-29-2024
  * @last modified by  : admillican08@gmail.com
  **/
 public with sharing class JobApplicationTriggerMethods {
@@ -11,7 +11,6 @@ public with sharing class JobApplicationTriggerMethods {
 
   // used for afterInsert
   public String copyInfoFromPosition(Map<Id, Job_Application__c> newJobAppMap) {
-    String msg = '';
     final String MTH_NAME = 'copyInfoFromPosition';
     Set<Id> positionIdSet = new Set<Id>();
     for (Job_Application__c newJobApp : newJobAppMap.values()) {
@@ -54,7 +53,7 @@ public with sharing class JobApplicationTriggerMethods {
         newJobApp.Salary__c = posn.Salary__c;
       }
     }
-    return updateParentJobApplications(jobAppLst);
+    return this.updateParentJobApplications(jobAppLst);
   }
 
   // Used for afterInsert and afterUpdate
@@ -95,7 +94,6 @@ public with sharing class JobApplicationTriggerMethods {
         );
       }
     }
-
     return Util_Upsert.upsertList(
       'Task',
       tskLstToUpsert,
@@ -221,56 +219,21 @@ public with sharing class JobApplicationTriggerMethods {
       for (Job_Application__c jobApp : jobAppsToUpd) {
         jobApp.Notes__c = '';
       }
-      this.updateParentJobApplications(jobAppsToUpd);
+      msg = this.updateParentJobApplications(jobAppsToUpd);
     }
     return msg;
   }
 
   /*
-  public String changeStatusOnParent(
+  public String changeStatus(
     Map<Id, Job_Application__c> newJobAppMap
   ) {
-    final String MTH_NAME = 'markTasksAsCompleteOnParent';
+    final String MTH_NAME = 'changeStatus';
     String msg = '';
-    List<Task> taskLst = new List<Task>();
-    List<Job_Application__c> jobAppsToUpdLst = new List<Job_Application__c>();
-    Map<Id, Job_Application__c> jobAppWithTasksMap = new Map<Id, Job_Application__c>(
-      [
-        SELECT
-          Id,
-          Application_Status__c,
-          Task_for_Stage_Completed__c,
-          (
-            SELECT Id, Subject, Status
-            FROM Tasks
-            WHERE
-              Subject LIKE 'Job Application To-Dos%'
-              AND Status = 'Completed'
-          )
-        FROM Job_Application__c
-        WHERE Task_for_Stage_Completed__c = FALSE
-        WITH USER_MODE
-      ]
-    );
-    for (Id jobId : newJobAppMap.keySet()) {
-      if(jobAppWithTasksMap.keySet().contains(jobId)){
-        Job_Application__c newJobApp = newJobAppMap.get(jobId);
-      {
-        for (Job_Application__c jobApp : jobAppWithTasksMap.values()) {
-          String statStr = jobApp.Application_Status__c;
-          if (jobApp.Tasks.size() > 0) {
-            for (Task tsk : jobApp.Tasks) {
-              if (tsk.Subject.StartsWith('Job Application To-Dos') && tsk.Subject.contains(statStr)) {
-                jobApp.Task_for_Stage_Completed__c = true;
-              }
-            }
-          }
-         
-      }
     }
     return this.updateParentJobApplications(jobAppsToUpdLst);
   }
-  */
+    */
 
   //private helper method
   @TestVisible

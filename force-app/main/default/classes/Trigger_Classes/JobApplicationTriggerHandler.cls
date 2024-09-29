@@ -2,7 +2,7 @@
  * @description       :
  * @author            : admillican08@gmail.com
  * @group             :
- * @last modified on  : 09-28-2024
+ * @last modified on  : 09-29-2024
  * @last modified by  : admillican08@gmail.com
  **/
 public with sharing class JobApplicationTriggerHandler extends TriggerHandler implements ItriggerHandler {
@@ -18,9 +18,9 @@ public with sharing class JobApplicationTriggerHandler extends TriggerHandler im
   public void afterInsert(Map<Id, SObject> newItems) {
     Set<String> afterInsMethods = new Set<String>{
       'createTasksForStatus',
+      'createJobApplicationContacts',
       'copyInfoFromPosition',
-      'createJobApplicationNotes',
-      'createJobApplicationContacts'
+      'createJobApplicationNotes'
     };
     if (
       !TriggerHandler.isDisabled &&
@@ -34,9 +34,9 @@ public with sharing class JobApplicationTriggerHandler extends TriggerHandler im
       Map<Id, Job_Application__c> newJobAppMap = (Map<Id, Job_Application__c>) newItems;
       JobApplicationTriggerMethods jobAppTrMthds = new JobApplicationTriggerMethods();
       jobAppTrMthds.copyInfoFromPosition(newJobAppMap);
+      jobAppTrMthds.createJobApplicationContacts(null, newJobAppMap);
       jobAppTrMthds.createTasksForStatus(null, newJobAppMap);
       jobAppTrMthds.createJobApplicationNotes(null, newJobAppMap);
-      jobAppTrMthds.createJobApplicationContacts(null, newJobAppMap);
       RecursiveChecker.addMethodNames(OBJ, afterInsMethods);
     } else {
       System.debug(
