@@ -10,7 +10,7 @@ public with sharing class TaskTriggerMethods {
   public static final String CLS_NAME = 'TaskTriggerMethods';
 
   // used for afterInsert
-  public String setTaskForStageCompletedToFalseOnParent(
+  public static String setTaskForStageCompletedToFalseOnParent(
     Map<Id, Task> newTaskMap
   ) {
     final String MTH_NAME = 'setTaskForStageCompletedToFalseToParent';
@@ -42,7 +42,7 @@ public with sharing class TaskTriggerMethods {
   }
 
   // used for afterUpdate
-  public String setTaskForStageCompletedToTrueOnParent(
+  public static String setTaskForStageCompletedToTrueOnParent(
     Map<Id, Task> oldTaskMap,
     Map<Id, Task> newTaskMap
   ) {

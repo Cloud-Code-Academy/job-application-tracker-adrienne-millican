@@ -2,7 +2,7 @@
  * @description       : This class handles the integration with the Jooble API.
  *                      It fetches job positions from Jooble, processes the response, and inserts positions into Salesforce.
  * @author            : admillican08@gmail.com
- * @last modified on  : 09-25-2024
+ * @last modified on  : 09-29-2024
  * @last modified by  : admillican08@gmail.com
  **/
 public with sharing class JoobleCallout {
@@ -328,7 +328,7 @@ public with sharing class JoobleCallout {
         if (
           mapPosn.External_System_Id__c != null &&
           posnLst[i].External_System_Id__c != null &&
-          mapPosn.External_System_Id__c.equals(posnLst[i].External_System_Id__c)
+          posnLst[i].External_System_Id__c.equals(mapPosn.External_System_Id__c)
         ) {
           // If the Reported_Last_Updated__c is the same, remove the new position
           if (

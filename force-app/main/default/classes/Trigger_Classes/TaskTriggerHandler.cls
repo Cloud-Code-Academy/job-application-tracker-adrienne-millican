@@ -12,10 +12,10 @@ public with sharing class TaskTriggerHandler extends TriggerHandler implements I
     super(objName);
   }
 
-  public void beforeInsert(List<sObject> newItemLst) {
+  public static void beforeInsert(List<sObject> newItemLst) {
   }
 
-  public void afterInsert(Map<Id, SObject> newItems) {
+  public static void afterInsert(Map<Id, SObject> newItems) {
     Set<String> afterInsMethods = new Set<String>{
       'setTaskForStageCompletedToFalseToParent'
     };
@@ -29,8 +29,7 @@ public with sharing class TaskTriggerHandler extends TriggerHandler implements I
         '*** TaskTriggerHandler is running afterInsert methods. ***'
       );
       Map<Id, Task> newTaskMap = (Map<Id, Task>) newItems;
-      TaskTriggerMethods taskMthds = new TaskTriggerMethods();
-      taskMthds.setTaskForStageCompletedToFalseOnParent(newTaskMap);
+      TaskTriggerMethods.setTaskForStageCompletedToFalseOnParent(newTaskMap);
     } else {
       System.debug(
         '*** TaskTriggerHandler is disabled or afterInsert methods have already run ***'
@@ -38,13 +37,13 @@ public with sharing class TaskTriggerHandler extends TriggerHandler implements I
     }
   }
 
-  public void beforeUpdate(
+  public static void beforeUpdate(
     Map<Id, sObject> newItems,
     Map<Id, sObject> oldItems
   ) {
   }
 
-  public void afterUpdate(
+  public static void afterUpdate(
     Map<Id, SObject> newItems,
     Map<Id, SObject> oldItems
   ) {
@@ -64,8 +63,10 @@ public with sharing class TaskTriggerHandler extends TriggerHandler implements I
       // Cast the Trigger.OldMap Map of Id, sObjects to Map of Id, Tasks to pass to Business Logic classes
       Map<Id, Task> oldTaskMap = (Map<Id, Task>) oldItems;
 
-      TaskTriggerMethods taskMthds = new TaskTriggerMethods();
-      taskMthds.setTaskForStageCompletedToTrueOnParent(oldTaskMap, newTaskMap);
+      TaskTriggerMethods.setTaskForStageCompletedToTrueOnParent(
+        oldTaskMap,
+        newTaskMap
+      );
     } else {
       System.debug(
         '*** TaskTriggerHandler is disabled or afterUpdate methods have already run ***'
@@ -73,12 +74,12 @@ public with sharing class TaskTriggerHandler extends TriggerHandler implements I
     }
   }
 
-  public void beforeDelete(Map<Id, sObject> oldItems) {
+  public static void beforeDelete(Map<Id, sObject> oldItems) {
   }
 
-  public void afterDelete(Map<Id, SObject> oldItems) {
+  public static void afterDelete(Map<Id, SObject> oldItems) {
   }
 
-  public void afterUndelete(Map<Id, SObject> newItems) {
+  public static void afterUndelete(Map<Id, SObject> newItems) {
   }
 }

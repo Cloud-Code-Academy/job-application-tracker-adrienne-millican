@@ -12,10 +12,13 @@ public with sharing class JobApplicationTriggerHandler extends TriggerHandler im
     super(objName);
   }
 
-  public void beforeInsert(List<sObject> newItemLst) {
+  public static void beforeInsert(List<sObject> newItemLst) {
+    System.debug(
+      '**No beforeInsert methods to run for JobApplicationTriggerHandler**'
+    );
   }
 
-  public void afterInsert(Map<Id, SObject> newItems) {
+  public static void afterInsert(Map<Id, SObject> newItems) {
     Set<String> afterInsMethods = new Set<String>{
       'createTasksForStatus',
       'createJobApplicationContacts',
@@ -29,14 +32,19 @@ public with sharing class JobApplicationTriggerHandler extends TriggerHandler im
     ) {
       // Cast the Trigger.NewMap Map of Id, sObjects to Map of Id, Job Application to pass to Business Logic classes
       System.debug(
-        '*** JobApplicationTriggerHandler is running afterInsert methods. ***'
+        '***JobApplicationTriggerHandler is running afterInsert methods. ***'
       );
       Map<Id, Job_Application__c> newJobAppMap = (Map<Id, Job_Application__c>) newItems;
-      JobApplicationTriggerMethods jobAppTrMthds = new JobApplicationTriggerMethods();
-      jobAppTrMthds.copyInfoFromPosition(newJobAppMap);
-      jobAppTrMthds.createJobApplicationContacts(null, newJobAppMap);
-      jobAppTrMthds.createTasksForStatus(null, newJobAppMap);
-      jobAppTrMthds.createJobApplicationNotes(null, newJobAppMap);
+      JobApplicationTriggerMethods.copyInfoFromPosition(newJobAppMap);
+      JobApplicationTriggerMethods.createJobApplicationContacts(
+        null,
+        newJobAppMap
+      );
+      JobApplicationTriggerMethods.createTasksForStatus(null, newJobAppMap);
+      JobApplicationTriggerMethods.createJobApplicationNotes(
+        null,
+        newJobAppMap
+      );
       RecursiveChecker.addMethodNames(OBJ, afterInsMethods);
     } else {
       System.debug(
@@ -45,13 +53,36 @@ public with sharing class JobApplicationTriggerHandler extends TriggerHandler im
     }
   }
 
-  public void beforeUpdate(
+  public static void beforeUpdate(
     Map<Id, sObject> newItems,
     Map<Id, sObject> oldItems
   ) {
+    Set<String> beforeUpdMethods = new Set<String>{ 'changeApplicationStatus' };
+    if (
+      !TriggerHandler.isDisabled &&
+      !TriggerHandler.isExempt &&
+      !RecursiveChecker.hasRun(OBJ, beforeUpdMethods)
+    ) {
+      System.debug(
+        '*** JobApplicationTriggerHandler is running afterInsert methods. ***'
+      );
+      // Cast the Trigger.OldMap Map of Id, sObjects to Map of Id, Opportunities to pass to Business Logic classes
+      Map<Id, Job_Application__c> oldJobAppMap = (Map<Id, Job_Application__c>) oldItems;
+      // Cast the Trigger.NewMap Map of Id, sObjects to Map of Id, Job Application to pass to Business Logic classes
+      Map<Id, Job_Application__c> newJobAppMap = (Map<Id, Job_Application__c>) newItems;
+      JobApplicationTriggerMethods.changeApplicationStatus(
+        oldJobAppMap,
+        newJobAppMap
+      );
+      RecursiveChecker.addMethodNames(OBJ, beforeUpdMethods);
+    } else {
+      System.debug(
+        '*** JobApplicationTriggerHandler is disabled or beforeUpdate methods have already run ***'
+      );
+    }
   }
 
-  public void afterUpdate(
+  public static void afterUpdate(
     Map<Id, SObject> newItems,
     Map<Id, SObject> oldItems
   ) {
@@ -72,11 +103,18 @@ public with sharing class JobApplicationTriggerHandler extends TriggerHandler im
       Map<Id, Job_Application__c> newJobAppMap = (Map<Id, Job_Application__c>) newItems;
       // Cast the Trigger.OldMap Map of Id, sObjects to Map of Id, Opportunities to pass to Business Logic classes
       Map<Id, Job_Application__c> oldJobAppMap = (Map<Id, Job_Application__c>) oldItems;
-
-      JobApplicationTriggerMethods jobAppTrMthds = new JobApplicationTriggerMethods();
-      jobAppTrMthds.createTasksForStatus(oldJobAppMap, newJobAppMap);
-      jobAppTrMthds.createJobApplicationNotes(oldJobAppMap, newJobAppMap);
-      jobAppTrMthds.createJobApplicationContacts(oldJobAppMap, newJobAppMap);
+      JobApplicationTriggerMethods.createTasksForStatus(
+        oldJobAppMap,
+        newJobAppMap
+      );
+      JobApplicationTriggerMethods.createJobApplicationNotes(
+        oldJobAppMap,
+        newJobAppMap
+      );
+      JobApplicationTriggerMethods.createJobApplicationContacts(
+        oldJobAppMap,
+        newJobAppMap
+      );
       RecursiveChecker.addMethodNames(OBJ, afterUpdMethods);
     } else {
       System.debug(
@@ -85,12 +123,21 @@ public with sharing class JobApplicationTriggerHandler extends TriggerHandler im
     }
   }
 
-  public void beforeDelete(Map<Id, sObject> oldItems) {
+  public static void beforeDelete(Map<Id, sObject> oldItems) {
+    System.debug(
+      '**No beforeDelete methods to run for JobApplicationTriggerHandler**'
+    );
   }
 
-  public void afterDelete(Map<Id, SObject> oldItems) {
+  public static void afterDelete(Map<Id, SObject> oldItems) {
+    System.debug(
+      '**No afterDelete methods to run for JobApplicationTriggerHandler**'
+    );
   }
 
-  public void afterUndelete(Map<Id, SObject> newItems) {
+  public static void afterUndelete(Map<Id, SObject> newItems) {
+    System.debug(
+      '**No afterUndelete methods to run for JobApplicationTriggerHandler**'
+    );
   }
 }

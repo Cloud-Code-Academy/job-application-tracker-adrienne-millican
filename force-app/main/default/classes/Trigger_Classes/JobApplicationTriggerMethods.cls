@@ -8,9 +8,19 @@
 public with sharing class JobApplicationTriggerMethods {
   public static final String OBJ_NAME = 'Job Application';
   public static final String CLS_NAME = 'JobApplicationTriggerMethods';
+  public static final StaticResource TASKJ = [
+    SELECT Id, Body
+    FROM StaticResource
+    WHERE Name = 'JobApplicationJson'
+    WITH SYSTEM_MODE
+    LIMIT 1
+  ];
+  public static final String TASK_STR = TASKJ.Body.toString();
 
   // used for afterInsert
-  public String copyInfoFromPosition(Map<Id, Job_Application__c> newJobAppMap) {
+  public static String copyInfoFromPosition(
+    Map<Id, Job_Application__c> newJobAppMap
+  ) {
     final String MTH_NAME = 'copyInfoFromPosition';
     Set<Id> positionIdSet = new Set<Id>();
     for (Job_Application__c newJobApp : newJobAppMap.values()) {
@@ -53,28 +63,50 @@ public with sharing class JobApplicationTriggerMethods {
         newJobApp.Salary__c = posn.Salary__c;
       }
     }
-    return this.updateParentJobApplications(jobAppLst);
+    return updateParentJobApplications(jobAppLst);
+  }
+
+  // Used for before update
+  public static void changeApplicationStatus(
+    Map<Id, Job_Application__c> oldJobAppMap,
+    Map<Id, Job_Application__c> newJobAppMap
+  ) {
+    final String MTH_NAME = 'changeApplicationStatus';
+    for (Id jobId : newJobAppMap.keySet()) {
+      Job_Application__c oldJobApp = oldJobAppMap?.get(jobId);
+      Job_Application__c newJobApp = newJobAppMap.get(jobId);
+      if (
+        (newJobApp.Task_for_Stage_Completed__c &&
+        (oldJobApp.Task_for_Stage_Completed__c !=
+        newJobApp.Task_for_Stage_Completed__c) &&
+        !newJobApp.Application_Status__c.equals('Closed'))
+      ) {
+        Map<String, Object> jsonMap = (Map<String, Object>) JSON.deserializeUntyped(
+          TASK_STR
+        );
+        Map<String, List<String>> statusTaskMap = createTaskMapFromJson(
+          jsonMap
+        );
+        Set<String> statusSet = statusTaskMap.keySet();
+        List<String> statusLst = new List<String>(statusSet);
+        Integer index = statusLst.indexOf(newJobApp.Application_Status__c);
+        newJobApp.Application_Status__c = statusLst.get(index + 1);
+      }
+    }
   }
 
   // Used for afterInsert and afterUpdate
-  public String createTasksForStatus(
+  public static String createTasksForStatus(
     Map<Id, Job_Application__c> oldJobAppMap,
     Map<Id, Job_Application__c> newJobAppMap
   ) {
     List<Job_Application__c> jobAppsToUpd = new List<Job_Application__c>();
     final String MTH_NAME = 'createTasksForStatus';
     List<Task> tskLstToUpsert = new List<Task>();
-    StaticResource taskJ = [
-      SELECT Id, Body
-      FROM StaticResource
-      WHERE Name = 'JobApplicationJson'
-      LIMIT 1
-    ];
-    String taskJStr = taskJ.Body.toString();
     Map<String, Object> jsonMap = (Map<String, Object>) JSON.deserializeUntyped(
-      taskJStr
+      TASK_STR
     );
-    Map<String, List<String>> statusTasksMap = createTaskMapFromJson(jsonMap);
+    Map<String, List<String>> statusTaskMap = createTaskMapFromJson(jsonMap);
     for (Id jobId : newJobAppMap.keySet()) {
       Job_Application__c oldJobApp = oldJobAppMap?.get(jobId);
       Job_Application__c newJobApp = newJobAppMap.get(jobId);
@@ -82,7 +114,7 @@ public with sharing class JobApplicationTriggerMethods {
         oldJobApp == null ||
         oldJobApp.Application_Status__c != newJobApp.Application_Status__c
       ) {
-        List<String> taskLst = statusTasksMap.get(
+        List<String> taskLst = statusTaskMap.get(
           newJobApp.Application_Status__c
         );
         tskLstToUpsert.add(
@@ -102,7 +134,7 @@ public with sharing class JobApplicationTriggerMethods {
   }
 
   // Used for afterInsert and afterUpdate
-  public String createJobApplicationContacts(
+  public static String createJobApplicationContacts(
     Map<Id, Job_Application__c> oldJobAppMap,
     Map<Id, Job_Application__c> newJobAppMap
   ) {
@@ -173,13 +205,13 @@ public with sharing class JobApplicationTriggerMethods {
             .Primary_Contact__c = jobApptoPrimContactMap.get(jobAppId);
         }
       }
-      return this.updateParentJobApplications(jobAppMap.values());
+      return updateParentJobApplications(jobAppMap.values());
     }
     return msg;
   }
 
   // Used for afterInsert and afterUpdate
-  public String createJobApplicationNotes(
+  public static String createJobApplicationNotes(
     Map<Id, Job_Application__c> oldJobAppMap,
     Map<Id, Job_Application__c> newJobAppMap
   ) {
@@ -219,31 +251,35 @@ public with sharing class JobApplicationTriggerMethods {
       for (Job_Application__c jobApp : jobAppsToUpd) {
         jobApp.Notes__c = '';
       }
-      msg = this.updateParentJobApplications(jobAppsToUpd);
+      msg = updateParentJobApplications(jobAppsToUpd);
     }
     return msg;
   }
 
-  /*
-  public String changeStatus(
-    Map<Id, Job_Application__c> newJobAppMap
+  //private helper method
+
+  @testVisible
+  private static String updateParentJobApplications(
+    List<Job_Application__c> jobAppLst
   ) {
-    final String MTH_NAME = 'changeStatus';
-    String msg = '';
-    }
-    return this.updateParentJobApplications(jobAppsToUpdLst);
+    final String MTH_NAME = 'updateParentJobApplications';
+    String msg = Util_Upsert.upsertList(
+      'Job Application',
+      jobAppLst,
+      MTH_NAME + ' of ' + CLS_NAME
+    );
+    return msg;
   }
-    */
 
   //private helper method
   @TestVisible
-  private Task createJobAppTaskFromJson(
+  private static Task createJobAppTaskFromJson(
     String statusVal,
     List<String> taskLst,
     Id jobAppId
   ) {
     Task tsk = new Task(
-      Subject = 'Job Application To-Dos for ' + statusVal + ' Status',
+      Subject = 'To-Dos for ' + statusVal + ' Status',
       Type = 'Job Application To-Dos',
       Status = 'Not Started',
       Priority = 'High',
@@ -259,13 +295,13 @@ public with sharing class JobApplicationTriggerMethods {
     }
     return tsk;
   }
-  // private helper method
-  @testVisible
-  private Map<String, List<String>> createTaskMapFromJson(
+
+  // private static helper method
+  private static Map<String, List<String>> createTaskMapFromJson(
     Map<String, Object> jsonMap
   ) {
     List<Object> statusObjLst = (List<Object>) jsonMap.get('statuses');
-    Map<String, List<String>> statusTasksMap = new Map<String, List<String>>();
+    Map<String, List<String>> statusTaskMap = new Map<String, List<String>>();
     for (Integer i = 0; i < statusObjLst.size(); i++) {
       Map<String, Object> indivStatusObjLst = (Map<String, Object>) statusObjLst.get(
         i
@@ -278,23 +314,8 @@ public with sharing class JobApplicationTriggerMethods {
         String taskDesc = (String) taskMap.get('Task');
         taskStrLst.add(taskDesc);
       }
-      statusTasksMap.put(statusVal, taskStrLst);
+      statusTaskMap.put(statusVal, taskStrLst);
     }
-    return statusTasksMap;
-  }
-
-  //private helper method
-
-  @testVisible
-  private String updateParentJobApplications(
-    List<Job_Application__c> jobAppLst
-  ) {
-    final String MTH_NAME = 'updateParentJobApplications';
-    String msg = Util_Upsert.upsertList(
-      'Job Application',
-      jobAppLst,
-      MTH_NAME + ' of ' + CLS_NAME
-    );
-    return msg;
+    return statusTaskMap;
   }
 }
