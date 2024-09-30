@@ -5,13 +5,14 @@
  *                      record exists, it is updated based on the latest Position__c data.
  * @author            : admillican08@gmail.com
  * @group             :
- * @last modified on  : 09-26-2024
+ * @last modified on  : 09-29-2024
  * @last modified by  : admillican08@gmail.com
  **/
 public with sharing class JobApplicationCreatorBatch implements Database.Batchable<sObject> {
   // Constants for object and class names used in logging
   public static final String OBJ_NAME = 'Job Application';
   public static final String CLS_NAME = 'JobApplicationCreatorBatch';
+  public List<Job_Application__c> jobAppLst { get; private set; }
 
   /**
    * @description       : The start method defines the scope of the batch by returning a QueryLocator.
@@ -41,7 +42,7 @@ public with sharing class JobApplicationCreatorBatch implements Database.Batchab
 
     // Iterate through each Position__c record in the batch
     for (Position__c posn : scope) {
-      List<Job_Application__c> jobAppLst = new List<Job_Application__c>();
+      jobAppLst = new List<Job_Application__c>();
 
       // If no Job_Application__c records exist for the Position__c, create a new one
       if (posn.Job_Applications__r.size() == 0) {
@@ -82,6 +83,5 @@ public with sharing class JobApplicationCreatorBatch implements Database.Batchab
   }
 
   public void finish(Database.BatchableContext bc) {
-    // No specific post-processing logic required here for now
   }
 }

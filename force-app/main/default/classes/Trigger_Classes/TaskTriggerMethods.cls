@@ -10,7 +10,7 @@ public with sharing class TaskTriggerMethods {
   public static final String CLS_NAME = 'TaskTriggerMethods';
 
   // used for afterInsert
-  public static String setTaskForStageCompletedToFalseOnParent(
+  public String setTaskForStageCompletedToFalseOnParent(
     Map<Id, Task> newTaskMap
   ) {
     final String MTH_NAME = 'setTaskForStageCompletedToFalseToParent';
@@ -19,7 +19,8 @@ public with sharing class TaskTriggerMethods {
     for (Id taskId : newTaskMap.keySet()) {
       Task newTask = newTaskMap.get(taskId);
       if (
-        newTask.Subject.startsWith('Job Application To-Dos') &&
+        newTask.Subject.startsWith('To-Dos') &&
+        newTask.Subject.contains('Status') &&
         newTask.Status.equals('Not Started')
       ) {
         jobAppIdSet.add(newTask.WhatId);
@@ -42,7 +43,7 @@ public with sharing class TaskTriggerMethods {
   }
 
   // used for afterUpdate
-  public static String setTaskForStageCompletedToTrueOnParent(
+  public String setTaskForStageCompletedToTrueOnParent(
     Map<Id, Task> oldTaskMap,
     Map<Id, Task> newTaskMap
   ) {
@@ -54,7 +55,8 @@ public with sharing class TaskTriggerMethods {
       Task newTask = newTaskMap.get(taskId);
       if (
         !oldTask.Status.equals(newTask.Status) &&
-        newTask.Subject.startsWith('Job Application To-Dos') &&
+        newTask.Subject.startsWith('To-Dos') &&
+        newTask.Subject.contains('Status') &&
         !oldTask.Status.equals('Completed') &&
         newTask.Status.equals('Completed')
       ) {

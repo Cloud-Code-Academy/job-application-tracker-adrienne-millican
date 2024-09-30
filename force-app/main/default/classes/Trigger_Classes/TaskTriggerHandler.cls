@@ -12,10 +12,10 @@ public with sharing class TaskTriggerHandler extends TriggerHandler implements I
     super(objName);
   }
 
-  public static void beforeInsert(List<sObject> newItemLst) {
+  public void beforeInsert(List<sObject> newItemLst) {
   }
 
-  public static void afterInsert(Map<Id, SObject> newItems) {
+  public void afterInsert(Map<Id, SObject> newItems) {
     Set<String> afterInsMethods = new Set<String>{
       'setTaskForStageCompletedToFalseToParent'
     };
@@ -29,7 +29,8 @@ public with sharing class TaskTriggerHandler extends TriggerHandler implements I
         '*** TaskTriggerHandler is running afterInsert methods. ***'
       );
       Map<Id, Task> newTaskMap = (Map<Id, Task>) newItems;
-      TaskTriggerMethods.setTaskForStageCompletedToFalseOnParent(newTaskMap);
+      TaskTriggerMethods newMethods = new TaskTriggerMethods();
+      newMethods.setTaskForStageCompletedToFalseOnParent(newTaskMap);
     } else {
       System.debug(
         '*** TaskTriggerHandler is disabled or afterInsert methods have already run ***'
@@ -37,13 +38,13 @@ public with sharing class TaskTriggerHandler extends TriggerHandler implements I
     }
   }
 
-  public static void beforeUpdate(
+  public void beforeUpdate(
     Map<Id, sObject> newItems,
     Map<Id, sObject> oldItems
   ) {
   }
 
-  public static void afterUpdate(
+  public void afterUpdate(
     Map<Id, SObject> newItems,
     Map<Id, SObject> oldItems
   ) {
@@ -63,7 +64,8 @@ public with sharing class TaskTriggerHandler extends TriggerHandler implements I
       // Cast the Trigger.OldMap Map of Id, sObjects to Map of Id, Tasks to pass to Business Logic classes
       Map<Id, Task> oldTaskMap = (Map<Id, Task>) oldItems;
 
-      TaskTriggerMethods.setTaskForStageCompletedToTrueOnParent(
+      TaskTriggerMethods newMethods = new TaskTriggerMethods();
+      newMethods.setTaskForStageCompletedToTrueOnParent(
         oldTaskMap,
         newTaskMap
       );
@@ -74,12 +76,12 @@ public with sharing class TaskTriggerHandler extends TriggerHandler implements I
     }
   }
 
-  public static void beforeDelete(Map<Id, sObject> oldItems) {
+  public void beforeDelete(Map<Id, sObject> oldItems) {
   }
 
-  public static void afterDelete(Map<Id, SObject> oldItems) {
+  public void afterDelete(Map<Id, SObject> oldItems) {
   }
 
-  public static void afterUndelete(Map<Id, SObject> newItems) {
+  public void afterUndelete(Map<Id, SObject> newItems) {
   }
 }

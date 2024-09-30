@@ -328,7 +328,7 @@ public with sharing class JoobleCallout {
         if (
           mapPosn.External_System_Id__c != null &&
           posnLst[i].External_System_Id__c != null &&
-          posnLst[i].External_System_Id__c.equals(mapPosn.External_System_Id__c)
+          mapPosn.External_System_Id__c.equals(posnLst[i].External_System_Id__c)
         ) {
           // If the Reported_Last_Updated__c is the same, remove the new position
           if (
