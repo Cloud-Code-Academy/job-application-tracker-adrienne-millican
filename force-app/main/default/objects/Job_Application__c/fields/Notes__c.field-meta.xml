@@ -5,6 +5,7 @@
     <inlineHelpText>The applicant&apos;s notes on the job application</inlineHelpText>
     <label>Notes</label>
     <length>1000</length>
+    <trackFeedHistory>false</trackFeedHistory>
     <trackHistory>false</trackHistory>
     <trackTrending>false</trackTrending>
     <type>LongTextArea</type>

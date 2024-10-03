@@ -3,7 +3,7 @@
     <fullName>Job_Link__c</fullName>
     <description>The link to the position description, if the job came from the Web. Inherited from Position</description>
     <externalId>false</externalId>
-    <formula>HYPERLINK(&apos;Position__r.Position_Link__c&apos;, &apos;Job Link&apos;)</formula>
+    <formula>Position__r.Position_Link__c</formula>
     <inlineHelpText>The link to the position description, if the job came from the Web. Inherited from Position</inlineHelpText>
     <label>Job Link</label>
     <required>false</required>

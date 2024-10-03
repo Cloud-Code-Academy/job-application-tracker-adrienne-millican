@@ -111,7 +111,6 @@ public with sharing class JoobleCallout {
         while (parser.nextToken() != null) {
           // Check for the start of a job object
           if (parser.getCurrentToken() == JSONToken.START_OBJECT) {
-            //System.debug('**About to read values');
             // Read each job object and add it to the list
             JPosition jooblePos = (JPosition) parser.readValueAs(
               JPosition.class
@@ -198,6 +197,7 @@ public with sharing class JoobleCallout {
     List<Position__c> posnLst
   ) {
     // Query for existing accounts with matching company names
+
     List<Account> acctsMatchingNames = queryForAcctsMatchingCompanyNames(
       posnLst
     );
@@ -215,6 +215,7 @@ public with sharing class JoobleCallout {
         }
       }
     }
+
     return posnLst; // Return the updated list of positions
   }
 
@@ -237,20 +238,21 @@ public with sharing class JoobleCallout {
     Set<String> companyNamesSet = new Set<String>();
     for (Position__c posn : posnLst) {
       if (posn.Company__c == null && !String.isBlank(posn.Company_Name__c)) {
-        String companyName = posn.Company_Name__c; // Extract the company name
-        System.debug('**companyName: ' + companyName);
-        companyNamesSet.add(companyName.trim());
+        companyNamesSet.add(posn.Company_Name__c.trim()); // Extract the company name
       }
     }
-    for (String companyName : companyNamesSet) {
-      qry += '\'' + companyName + '\','; // Append the company name to the query
+    List<String> companyNamesLst = new List<String>(companyNamesSet);
+    for (String companyName : companyNamesLst) {
+      // increment counter;
+      counter++;
+      qry += '\'' + companyName + '\',';
     }
 
     // If there were any companies to query, remove the trailing comma and close the query string
     if (counter > 0) {
       qry = qry.substring(0, qry.length() - 1) + ')';
       system.debug('**query: ' + qry); // Log the generated query
-      acctsMatchingNames = Database.query(qry, AccessLevel.USER_MODE); // Execute the query
+      acctsMatchingNames = Database.query(qry); // Execute the query
     }
 
     return acctsMatchingNames; // Return the list of matching accounts
@@ -273,7 +275,6 @@ public with sharing class JoobleCallout {
     for (Position__c posn : posnLst) {
       if (posn.Company__c == null && posn.Company_Name__c != null) {
         Account newAcct = new Account(Name = posn.Company_Name__c); // Create a new Account using the company name
-        System.debug('**New account: ' + newAcct.Name); // Log the creation of the new Account
         newAccounts.add(newAcct); // Add the new Account to the list
       }
     }
@@ -324,31 +325,44 @@ public with sharing class JoobleCallout {
       ]
     );
 
+    Map<String, Id> extIdToPosIdMap = new Map<String, Id>();
+    for (Position__c posn : existingPosnMap.values()) {
+      if (posn.External_System_Id__c != null) {
+        extIdtoPosIdMap.put(posn.External_System_Id__c, posn.Id);
+      }
+    }
     // Loop through the list of new positions and compare them with the existing positions in Salesforce
     for (Integer i = 0; i < posnLst.size(); i++) {
-      for (Id posnId : existingPosnMap.keySet()) {
-        Position__c mapPosn = existingPosnMap.get(posnId); // Get the existing position record
-        // Check if the External_System_Id__c matches between the new and existing position
+      // Check if the External_System_Id__c matches between the new and existing position
+      Position__c existingPosition;
+      if (extIdToPosIdMap.keySet().contains(posnLst[i].External_System_Id__c)) {
+        Id posnId = extIdToPosIdMap.get(posnLst[i].External_System_Id__c);
+        existingPosition = existingPosnMap.get(posnId);
+      }
+      // If the Reported_Last_Updated__c is the same, remove the new position
+      if (
+        existingPosition != null &&
+        existingPosition.Reported_Last_Updated__c ==
+        posnLst[i].Reported_Last_Updated__c
+      ) {
+        posnLst.remove(i); // Remove the duplicate position
+      } else {
+        // If the existing position is more recent, update the new position with the existing record's ID
         if (
-          mapPosn.External_System_Id__c != null &&
-          posnLst[i].External_System_Id__c != null &&
-          mapPosn.External_System_Id__c.equals(posnLst[i].External_System_Id__c)
+          existingPosition != null &&
+          existingPosition.Reported_Last_Updated__c <
+          posnLst[i].Reported_Last_Updated__c
         ) {
-          // If the Reported_Last_Updated__c is the same, remove the new position
-          if (
-            mapPosn.Reported_Last_Updated__c ==
-            posnLst[i].Reported_Last_Updated__c
-          ) {
-            posnLst.remove(i); // Remove the duplicate position
-          } else {
-            // If the existing position is more recent, update the new position with the existing record's ID
-            if (
-              mapPosn.Reported_Last_Updated__c >
-              posnLst[i].Reported_Last_Updated__c
-            ) {
-              posnLst[i].Id = mapPosn.Id; // Update the new position's ID to match the existing one
-            }
-          }
+          existingPosition.Reported_Last_Updated__c = posnLst[i]
+            .Reported_Last_Updated__c;
+          existingPosition.Salary__c = posnLst[i].Salary__c;
+          existingPosition.Position_Description__c = posnLst[i]
+            .Position_Description__c;
+          existingPosition.Geographic_Job_Location__c = posnLst[i]
+            .Geographic_Job_Location__c;
+          posnLst.add(existingPosition);
+          posnLst.remove(i);
+          // Update the old position with updated info
         }
       }
     }
@@ -359,6 +373,7 @@ public with sharing class JoobleCallout {
   @testVisible
   //private helper method to clean up the messy input data and to make parsing the JSON possible
   private static String removeExtraneous(String input) {
+    input = input.replaceAll('\'', '');
     input = input.replaceAll('\\\\[a-z]', '');
     input = input.replaceAll('~', '');
     input = input.replaceAll('&nbsp;', '');
