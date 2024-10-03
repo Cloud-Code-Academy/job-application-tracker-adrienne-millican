@@ -2,7 +2,7 @@
  * @description       : This class handles the integration with the Jooble API.
  *                      It fetches job positions from Jooble, processes the response, and inserts positions into Salesforce.
  * @author            : admillican08@gmail.com
- * @last modified on  : 09-29-2024
+ * @last modified on  : 10-03-2024
  * @last modified by  : admillican08@gmail.com
  **/
 public with sharing class JoobleCallout {
@@ -111,7 +111,7 @@ public with sharing class JoobleCallout {
         while (parser.nextToken() != null) {
           // Check for the start of a job object
           if (parser.getCurrentToken() == JSONToken.START_OBJECT) {
-            System.debug('**About to read values');
+            //System.debug('**About to read values');
             // Read each job object and add it to the list
             JPosition jooblePos = (JPosition) parser.readValueAs(
               JPosition.class
@@ -234,12 +234,16 @@ public with sharing class JoobleCallout {
     Integer counter = 0; // Counter to track the number of positions to include in the query
 
     // Loop through the Position__c records and build the query if the company name is provided and not already associated with an account
+    Set<String> companyNamesSet = new Set<String>();
     for (Position__c posn : posnLst) {
       if (posn.Company__c == null && !String.isBlank(posn.Company_Name__c)) {
         String companyName = posn.Company_Name__c; // Extract the company name
-        counter++; // Increment the counter
-        qry += '\'' + companyName + '\','; // Append the company name to the query
+        System.debug('**companyName: ' + companyName);
+        companyNamesSet.add(companyName.trim());
       }
+    }
+    for (String companyName : companyNamesSet) {
+      qry += '\'' + companyName + '\','; // Append the company name to the query
     }
 
     // If there were any companies to query, remove the trailing comma and close the query string

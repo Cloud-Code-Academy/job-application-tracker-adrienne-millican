@@ -2,7 +2,7 @@
  * @description       :
  * @author            : admillican08@gmail.com
  * @group             :
- * @last modified on  : 09-29-2024
+ * @last modified on  : 10-03-2024
  * @last modified by  : admillican08@gmail.com
  **/
 public with sharing class JobApplicationTriggerMethods {
@@ -295,7 +295,7 @@ public with sharing class JobApplicationTriggerMethods {
     return tsk;
   }
 
-  // private static helper method
+  // private helper method
   private Map<String, List<String>> createTaskMapFromJson() {
     Map<String, Object> jsonMap = (Map<String, Object>) JSON.deserializeUntyped(
       TASK_STR
