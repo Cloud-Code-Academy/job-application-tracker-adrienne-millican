@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PathAssistant xmlns="http://soap.sforce.com/2006/04/metadata">
+    <active>true</active>
+    <entityName>Job_Application__c</entityName>
+    <fieldName>Application_Status__c</fieldName>
+    <masterLabel>Job Application Path</masterLabel>
+    <pathAssistantSteps>
+        <info>&lt;p&gt;&lt;strong style=&quot;font-size: 13px;&quot;&gt;Applicant To Dos:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Write your resignation, if applicable&lt;/li&gt;&lt;li&gt;Take some time leaving your former position to relax and recharge&lt;/li&gt;&lt;li&gt;Prepare for your first day of onboarding at the new position&lt;/li&gt;&lt;/ul&gt;</info>
+        <picklistValueName>Accepted</picklistValueName>
+    </pathAssistantSteps>
+    <pathAssistantSteps>
+        <info>&lt;p&gt;&lt;strong style=&quot;font-size: 13px;&quot;&gt;Applicant To Dos:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Contact the &lt;strong&gt;Hiring Manager&lt;/strong&gt; or &lt;strong&gt;Recruiter&lt;/strong&gt; for any position you are interested in&lt;/li&gt;&lt;li&gt;Follow up on your application via email at least weekly&lt;/li&gt;&lt;li&gt;Continue identifying and saving similar job opportunities&lt;/li&gt;&lt;li&gt;Set up weekly networking calls to explore similar companies and roles&lt;/li&gt;&lt;/ul&gt;</info>
+        <picklistValueName>Applied</picklistValueName>
+    </pathAssistantSteps>
+    <pathAssistantSteps>
+        <fieldNames>Primary_Contact__c</fieldNames>
+        <info>&lt;p&gt;&lt;strong style=&quot;font-size: 13px;&quot;&gt;Applicant To Dos:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Identify and conduct research about someone at the company and add them as a &lt;strong&gt;Primary Contact&lt;/strong&gt;&lt;/li&gt;&lt;li&gt;Arrange an informational interview with your Primary Contact to learn more about the company&lt;/li&gt;&lt;li&gt;Identify potential referrals to minimize the chances of application rejection&lt;/li&gt;&lt;li&gt;Customize your work achievements using keywords from the job description&lt;/li&gt;&lt;li&gt;Submit your application directly on the company website if possible&lt;/li&gt;&lt;/ul&gt;</info>
+        <picklistValueName>Applying</picklistValueName>
+    </pathAssistantSteps>
+    <pathAssistantSteps>
+        <info>&lt;p&gt;&lt;strong style=&quot;font-size: 13px;&quot;&gt;Applicant To Dos:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Send a follow-up email thanking each interviewer and asking for feedback&lt;/li&gt;&lt;li&gt;Review your notes and reflect on areas for improvement&lt;/li&gt;&lt;/ul&gt;</info>
+        <picklistValueName>Closed</picklistValueName>
+    </pathAssistantSteps>
+    <pathAssistantSteps>
+        <info>&lt;p&gt;&lt;strong style=&quot;font-size: 13px;&quot;&gt;Applicant To Dos:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Prepare your stock &amp;quot;tell me about yourself&amp;quot; response&lt;/li&gt;&lt;li&gt;Practice answering behavioral interview questions&lt;/li&gt;&lt;li&gt;Research the company and your interviewers&lt;/li&gt;&lt;li&gt;Set up your virtual interview space and verify that your software and hardware work properly&lt;/li&gt;&lt;li&gt;Send thank-you emails no later than 24 hours after the completion of each interview&lt;/li&gt;&lt;/ul&gt;</info>
+        <picklistValueName>Interviewing</picklistValueName>
+    </pathAssistantSteps>
+    <pathAssistantSteps>
+        <info>&lt;p&gt;&lt;strong style=&quot;font-size: 13px;&quot;&gt;Applicant To Dos:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Research your market value and know realistic ranges&lt;/li&gt;&lt;li&gt;Prepare your negotiation scripts&lt;/li&gt;&lt;li&gt;Evaluate your offers and decline or accept them&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;</info>
+        <picklistValueName>Negotiating</picklistValueName>
+    </pathAssistantSteps>
+    <pathAssistantSteps>
+        <fieldNames>Job_Description__c</fieldNames>
+        <info>&lt;p&gt;&lt;strong&gt;Applicant To Dos:&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Check if the &lt;strong&gt;Job Description&lt;/strong&gt; aligns with your interests and values&lt;/li&gt;&lt;li&gt;Review the highlighted skills to see if the role is a good fit&lt;/li&gt;&lt;li&gt;Research the company or role and set your &lt;strong&gt;Interest Rating&lt;/strong&gt;&lt;/li&gt;&lt;/ul&gt;</info>
+        <picklistValueName>Saved</picklistValueName>
+    </pathAssistantSteps>
+    <recordTypeName>__MASTER__</recordTypeName>
+</PathAssistant>

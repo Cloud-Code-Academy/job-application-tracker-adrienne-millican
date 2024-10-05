@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AnimationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <animationFrequency>sometimes</animationFrequency>
+    <developerName>Job_Application_Path</developerName>
+    <isActive>true</isActive>
+    <masterLabel>Job Application Path</masterLabel>
+    <recordTypeContext>Master</recordTypeContext>
+    <recordTypeName>__MASTER__</recordTypeName>
+    <sobjectType>Job_Application__c</sobjectType>
+    <targetField>Application_Status__c</targetField>
+    <targetFieldChangeToValues>Accepted</targetFieldChangeToValues>
+</AnimationRule>

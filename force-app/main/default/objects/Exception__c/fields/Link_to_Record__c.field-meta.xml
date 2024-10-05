@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Link_to_Record__c</fullName>
+    <description>The link to the record involved in the exception; if a batch process threw the exception, the link to the first record processed by the batch process.W-014075</description>
+    <externalId>false</externalId>
+    <formula>$CustomMetadata.Org_Variables__mdt.JobTr_Org.Org_URL__c + &apos;/&apos; +  Obj_Record_Id__c</formula>
+    <inlineHelpText>The link to the record involved in the exception; if a batch process threw the exception, the link to the first record processed by the batch process</inlineHelpText>
+    <label>Link to Record</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

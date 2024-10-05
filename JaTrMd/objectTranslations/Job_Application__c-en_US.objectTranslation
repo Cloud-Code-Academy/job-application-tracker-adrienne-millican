@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Job Application</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Job Applications</value>
+    </caseValues>
+    <fields>
+        <help><!-- The Salesforce user who is the job applicant --></help>
+        <label><!-- Applicant --></label>
+        <name>Applicant__c</name>
+        <relationshipLabel><!-- Job Applications --></relationshipLabel>
+    </fields>
+    <fields>
+        <help><!-- The date on which the application was submitted --></help>
+        <label><!-- Application Date --></label>
+        <name>Application_Date__c</name>
+    </fields>
+    <fields>
+        <help><!-- The application&apos;s current status --></help>
+        <label><!-- Application Status --></label>
+        <name>Application_Status__c</name>
+    </fields>
+    <fields>
+        <help><!-- The company to which the position being applied for belongs --></help>
+        <label><!-- Company --></label>
+        <name>Company__c</name>
+        <relationshipLabel><!-- Job Applications --></relationshipLabel>
+    </fields>
+    <fields>
+        <help><!-- The applicant&apos;s desired salary for the position --></help>
+        <label><!-- Expected Salary --></label>
+        <name>Expected_Salary__c</name>
+    </fields>
+    <fields>
+        <help><!-- The applicant&apos;s rating of the attractiveness of the potential position, with 5 being the highest and 1 being the lowest --></help>
+        <label><!-- Interest Rating --></label>
+        <name>Interest_Rating__c</name>
+    </fields>
+    <fields>
+        <help><!-- The detailed job description, copied from the position description but allows for editing and additions. --></help>
+        <label><!-- Job Description --></label>
+        <name>Job_Description__c</name>
+    </fields>
+    <fields>
+        <help><!-- The link to the position description, if the job came from the Web. Inherited from Position --></help>
+        <label><!-- Job Link --></label>
+        <name>Job_Link__c</name>
+    </fields>
+    <fields>
+        <help><!-- The location of the position --></help>
+        <label><!-- Job Location --></label>
+        <name>Job_Location__c</name>
+    </fields>
+    <fields>
+        <help><!-- The applicant&apos;s notes on the job application --></help>
+        <label><!-- Notes --></label>
+        <name>Notes__c</name>
+    </fields>
+    <fields>
+        <help><!-- The title of the position for which the applicant is applying --></help>
+        <label><!-- Position Title --></label>
+        <name>Position_Title__c</name>
+    </fields>
+    <fields>
+        <help><!-- The position for which the job application is being submitted --></help>
+        <label><!-- Position --></label>
+        <name>Position__c</name>
+        <relationshipLabel><!-- Job Applications --></relationshipLabel>
+    </fields>
+    <fields>
+        <help><!-- The primary contact for the job application --></help>
+        <label><!-- Primary Contact --></label>
+        <name>Primary_Contact__c</name>
+        <relationshipLabel><!-- Job Applications (PoC) --></relationshipLabel>
+    </fields>
+    <layouts>
+        <layout>Job Application Layout</layout>
+        <sections>
+            <label><!-- Applicant Information --></label>
+            <section>Applicant Information</section>
+        </sections>
+        <sections>
+            <label><!-- Company Information --></label>
+            <section>Company Information</section>
+        </sections>
+        <sections>
+            <label><!-- Custom Links --></label>
+            <section>Custom Links</section>
+        </sections>
+        <sections>
+            <label><!-- Position Information --></label>
+            <section>Position Information</section>
+        </sections>
+    </layouts>
+    <quickActions>
+        <label><!-- Email --></label>
+        <name>Send_JA_Email</name>
+    </quickActions>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

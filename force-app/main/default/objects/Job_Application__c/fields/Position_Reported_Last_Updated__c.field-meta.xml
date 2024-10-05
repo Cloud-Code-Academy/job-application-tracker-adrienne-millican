@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Position_Reported_Last_Updated__c</fullName>
+    <description>The date and time on which the position was last updated by the system, site, or board on which it was posted.</description>
+    <inlineHelpText>The date and time on which the position was last updated by the system, site, or board on which it was posted.</inlineHelpText>
+    <label>Position Reported Last Updated</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>DateTime</type>
+</CustomField>

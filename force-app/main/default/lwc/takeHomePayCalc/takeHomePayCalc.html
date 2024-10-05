@@ -1,0 +1,320 @@
+<!--
+  @description       : 
+  @author            : admillican08@gmail.com
+  @group             : 
+  @last modified on  : 09-26-2024
+  @last modified by  : admillican08@gmail.com
+-->
+<template>
+  <lightning-card>
+    <h1 slot="title" class="slds-text-heading_medium">Pay Calculator</h1>
+    <p class="subHeadText">All Rates Used are for the Current Year: {currYr}</p>
+
+    <!--Answer Relevant Questions-->
+    <lightning-tabset>
+      <lightning-tab label="Please Provide Salary Data">
+        <div class="slds-m-left_small">
+          <lightning-combobox
+            class="slds-m-top_small"
+            name="howPaid"
+            label="How You are Paid"
+            value={howPaidVal}
+            placeholder={howPaidVal}
+            options={howPaidOptions}
+            onchange={handleHowPaidChange}
+            required
+          >
+          </lightning-combobox>
+
+          <lightning-combobox
+            class="slds-m-top_small"
+            name="payFrequency"
+            label="Pay Frequency"
+            value={value}
+            placeholder="Select Pay Frequency"
+            options={payFreqOptions}
+            onchange={handlePayFreqChange}
+            required
+          >
+          </lightning-combobox>
+
+          <template lwc:if={showSalaried}>
+            <lightning-input
+              class="slds-m-top_small"
+              type="number"
+              name="salaryAmount"
+              label="Salary Amount"
+              value={value}
+              formatter="currency"
+              step="0.01"
+              placeholder={salAmt}
+              onchange={handleNumericChange}
+              required
+            >
+            </lightning-input>
+          </template>
+
+          <template lwc:elseif={showHourly}>
+            <lightning-input
+              class="slds-m-top_small"
+              type="number"
+              name="hrsWorked"
+              label="Hours Worked Per Pay Period"
+              step="0.01"
+              value={value}
+              placeholder="Enter the Hours Worked"
+              onchange={handleNumericChange}
+              required
+            >
+            </lightning-input>
+
+            <lightning-input
+              class="slds-m-top_small"
+              type="number"
+              name="hrlyRate"
+              label="Hourly Rate"
+              value={value}
+              step="0.01"
+              placeholder="Enter your Hourly Rate"
+              onchange={handleNumericChange}
+              required
+            >
+            </lightning-input>
+          </template>
+        </div>
+      </lightning-tab>
+      <!--Input Salary-->
+
+      <lightning-tab label="Please Provide Other Relevant Data">
+        <div class="slds-m-left_small">
+          <lightning-combobox
+            class="slds-m-top_small"
+            name="filingStatus"
+            label="Federal Tax Filing Status"
+            value={value}
+            placeholder="Select Your Federal Tax Filing Status"
+            options={filingStatusOptions}
+            onchange={handleFilingStatusChange}
+            required
+          >
+          </lightning-combobox>
+
+          <lightning-input
+            class="slds-m-top_small"
+            type="number"
+            name="addtlPretaxDeductAmt"
+            label="Additional Pre-Tax Deduction Amount Per Paycheck"
+            value={value}
+            formatter="currency"
+            step="0.01"
+            placeholder="Enter Any Pre-Tax (Nontaxable) Deductions Per Paycheck"
+            onchange={handleNumericChange}
+          >
+          </lightning-input>
+
+          <lightning-input
+            class="slds-m-top_small"
+            type="number"
+            name="addtlPosttaxDeductAmt"
+            label="Additional Post-Tax Deduction Amount Per Paycheck"
+            value={value}
+            formatter="currency"
+            step="0.01"
+            placeholder="Enter Any Post-Tax Deductions Per Paycheck"
+            onchange={handleNumericChange}
+          >
+          </lightning-input>
+
+          <lightning-input
+            class="slds-m-top_small"
+            type="number"
+            name="extraTax"
+            label="Additional Tax Withheld Per Paycheck"
+            value={value}
+            formatter="currency"
+            step="0.01"
+            placeholder="Enter Any Additional Tax Withheld Per Paycheck"
+            onchange={handleNumericChange}
+          >
+          </lightning-input>
+
+          <lightning-input
+            class="slds-m-top_small"
+            type="number"
+            name="addtlIncome"
+            label="Additional Income for the Year"
+            value={value}
+            formatter="currency"
+            step="0.01"
+            placeholder="Enter Any Additional Income"
+            onchange={handleNumericChange}
+          >
+          </lightning-input>
+        </div>
+      </lightning-tab>
+      <!--Make Selection Re: Exemptions-->
+      <lightning-tab label="Please Answer re: Exemptions">
+        <div class="slds-m-left_small">
+          <lightning-radio-group
+            class="slds-m-top_small"
+            name="federalExempt"
+            label="Are You Exempt from Federal Income Tax?"
+            options={radioOptions}
+            value={fedExemptValue}
+            onchange={handleExemptFederalChange}
+            required
+          >
+          </lightning-radio-group>
+
+          <lightning-radio-group
+            class="slds-m-top_small"
+            name="medicareExempt"
+            label="Are You Exempt from Medicare Tax?"
+            options={radioOptions}
+            value={value}
+            onchange={handleExemptMedicareChange}
+            required
+          >
+          </lightning-radio-group>
+
+          <lightning-radio-group
+            class="slds-m-top_small"
+            name="socialExempt"
+            label="Are You Exempt from Social Security Tax?"
+            options={radioOptions}
+            value={value}
+            onchange={handleExemptSocChange}
+            required
+          >
+          </lightning-radio-group>
+        </div>
+      </lightning-tab>
+
+      <template lwc:if={hasFilingStatus}>
+        <lightning-tab label="Please Select the Applicable Options">
+          <div class="slds-m-left_small">
+            <lightning-radio-group
+              class="slds-m-top_small"
+              name="isBlind"
+              label="Are You or Your Spouse Blind?"
+              options={radioOptions}
+              value={value}
+              onchange={handleIsBlind}
+              required
+            >
+            </lightning-radio-group>
+
+            <lightning-radio-group
+              class="slds-m-top_small"
+              name="isSenior"
+              label="Are You Over 65 Years of Age?"
+              options={radioOptions}
+              value={value}
+              onchange={handleIsSenior}
+              required
+            >
+            </lightning-radio-group>
+
+            <template lwc:if={showCalculate}>
+              <p class="labelText">
+                If the sum of your itemized deductions is greater than your
+                standard deduction amount of &nbsp;
+                <span class="strong-text">${stdDeduct}</span>, enter it here:
+              </p>
+              <lightning-input
+                class="slds-m-top_small"
+                type="number"
+                name="itemizedDeduction"
+                label="Total Itemized Deductions"
+                value={value}
+                formatter="currency"
+                step="0.01"
+                placeholder="Enter Total Itemized Deductions"
+                onchange={handleNumericChange}
+              >
+              </lightning-input>
+            </template>
+          </div>
+        </lightning-tab>
+      </template>
+    </lightning-tabset>
+
+    <!--Process-->
+
+    <template lwc:if={showCalculate}>
+      <div class="slds-m-top_small">
+        <div class="slds-m-left_small">
+          <lightning-button
+            class="slds-m-top_small"
+            variant="brand"
+            label="Calculate"
+            title="Calculate"
+            onclick={handleClick}
+          ></lightning-button>
+        </div>
+      </div>
+    </template>
+    <!--Display results-->
+    <template lwc:if={takeHomePay}>
+      <div class="slds-text-align_left">
+        <div slot="footer" class="resultText">
+          <p>
+            <span class="slds-m-bottom_small"
+              >Gross Salary Amount for Period: &nbsp;
+              <span class="slds-text-color_success"
+                ><lightning-formatted-number
+                  value={grossSalDiv}
+                  format-style="currency"
+                  currency-code="USD"
+                ></lightning-formatted-number></span
+            ></span>
+          </p>
+          <p>
+            <span class="slds-m-bottom_small"
+              >Federal Income Tax Paid for Period: &nbsp;
+              <span class="slds-text-color_success"
+                ><lightning-formatted-number
+                  value={fedTax}
+                  format-style="currency"
+                  currency-code="USD"
+                ></lightning-formatted-number></span
+            ></span>
+          </p>
+          <p>
+            <span class="slds-m-bottom_small"
+              >Social Security Tax Paid for Period: &nbsp;
+              <span class="slds-text-color_success"
+                ><lightning-formatted-number
+                  value={socSecTax}
+                  format-style="currency"
+                  currency-code="USD"
+                ></lightning-formatted-number></span
+            ></span>
+          </p>
+          <p>
+            <span class="slds-m-bottom_small"
+              >Medicare Tax Paid for Period: &nbsp;
+              <span class="slds-text-color_success"
+                ><lightning-formatted-number
+                  value={medTax}
+                  format-style="currency"
+                  currency-code="USD"
+                ></lightning-formatted-number></span
+            ></span>
+          </p>
+          <p>
+            <span class="slds-m-bottom_small"
+              >Take Home Pay Amount for Period: &nbsp;
+              <span class="slds-text-color_success"
+                ><lightning-formatted-number
+                  value={takeHomePay}
+                  format-style="currency"
+                  currency-code="USD"
+                ></lightning-formatted-number></span
+            ></span>
+          </p>
+        </div>
+      </div>
+    </template>
+  </lightning-card>
+</template>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Contact_Company_Must_Equal_JA_Company</fullName>
+    <active>true</active>
+    <description>The Contact&apos;s Account must be the same as the Job Application&apos;s Company (Account)</description>
+    <errorConditionFormula>( Job_Application_Company_Id__c !=  Contact__r.AccountId ) &amp;&amp;
+!$Permission.Rule_Exempt</errorConditionFormula>
+    <errorDisplayField>Contact__c</errorDisplayField>
+    <errorMessage>The Contact&apos;s Account must be the same as the Job Application&apos;s Company (Account)</errorMessage>
+</ValidationRule>

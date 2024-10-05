@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Job_Address__c</fullName>
+    <description>The address of the job site, if different from the company&apos;s address</description>
+    <inlineHelpText>The address of the job site, if different from the company&apos;s address</inlineHelpText>
+    <label>Job Address</label>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Address</type>
+</CustomField>

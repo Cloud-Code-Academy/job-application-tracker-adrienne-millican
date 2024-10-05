@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Primary_JA_Contact__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>The indicator whether the contact is the primary contact for the job application</description>
+    <inlineHelpText>The indicator whether the contact is the primary contact for the job application</inlineHelpText>
+    <label>Primary JA Contact?</label>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

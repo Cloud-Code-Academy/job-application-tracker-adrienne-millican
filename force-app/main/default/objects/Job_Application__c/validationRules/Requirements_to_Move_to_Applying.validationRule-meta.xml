@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Requirements_to_Move_to_Applying</fullName>
+    <active>true</active>
+    <description>Requirements to move to Applying Status</description>
+    <errorConditionFormula>(TEXT(Application_Status__c) == &apos;Applying&apos; ||
+TEXT(Application_Status__c) == &apos;Applied&apos; ||
+TEXT(Application_Status__c) == &apos;Interviewing&apos; ||
+TEXT(Application_Status__c) == &apos;Negotiating&apos; ||
+TEXT(Application_Status__c) == &apos;Accepted&apos;) &amp;&amp;
+(ISBLANK(Applicant__c) ||
+ISPICKVAL(	Interest_Rating__c, &apos;&apos;) ||
+(Task_for_Stage_Completed__c == FALSE)) &amp;&amp;
+	NOT( $Permission.Rule_Exempt )</errorConditionFormula>
+    <errorMessage>Moving past the &apos;Saved&apos; status requires selecting an Interest Rating and completing the open To-Do task</errorMessage>
+</ValidationRule>
