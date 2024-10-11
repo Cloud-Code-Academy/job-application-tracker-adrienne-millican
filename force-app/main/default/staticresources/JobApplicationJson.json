@@ -1,0 +1,64 @@
+{
+  "statuses": [
+    {
+      "Status": "Saved",
+      "Tasks": [
+        {"Task": "Check if the job description aligns with your interests and values"},
+        {"Task": "Review the highlighted skills to see if the role is a good fit"},
+        {"Task": "Research the company or role and mark your excitement level"}
+      ]
+    },
+    {
+      "Status": "Applying",
+      "Tasks": [
+        {"Task": "Find and research someone who works at the company and add them as a contact"},
+        {"Task": "Set up an informational interview to learn more about the role/company"},
+        {"Task": "Identify potential referrals to help get your application on the top of the pile"},
+        {"Task": "Customize your work achievements using the job description keywords"},
+        {"Task": "Submit your application on the company website if possible"}
+      ]
+    },
+    {
+      "Status": "Applied",
+      "Tasks": [
+        {"Task": "Reach out to the hiring manager or recruiter"},
+        {"Task": "Follow up on your application via email weekly"},
+        {"Task": "Continue identifying and saving similar job opportunities"},
+        {"Task": "Set up weekly networking calls to explore similar companies/roles"}
+      ]
+    },
+    {
+      "Status": "Interviewing",
+      "Tasks": [
+        {"Task": "Prepare your blurb or 'tell me about yourself' response"},
+        {"Task": "Practice answering behavioral interview questions"},
+        {"Task": "Research the company and your interviewers"},
+        {"Task": "Set up your virtual interview space and test your tech"},
+        {"Task": "Send thank you emails within 24 hours"}
+      ]
+    },
+    {
+      "Status": "Negotiating",
+      "Tasks": [
+        {"Task": "Research your market value and know your numbers"},
+        {"Task": "Prepare your negotiation scripts"},
+        {"Task": "Evaluate your offer and decline or accept"}
+      ]
+    },
+    {
+      "Status": "Accepted",
+      "Tasks": [
+        {"Task": "Plan your resignation if applicable"},
+        {"Task": "Take some time to relax and recharge"},
+        {"Task": "Prepare for your first day of onboarding"}
+      ]
+    },
+    {
+      "Status": "Closed",
+      "Tasks": [
+        {"Task": "Send a follow-up email thanking the interviewer and asking for feedback"},
+        {"Task": "Review your notes and reflect on areas of improvement"}
+      ]
+    }
+  ]
+}
