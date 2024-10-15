@@ -291,7 +291,7 @@ public with sharing class JoobleCallout {
     return newAccounts; // Return the list of newly created Account objects
   }
 
-/**
+  /**
    * @description       : Removes or updates existing Position__c records if they match with new positions based on the External_System_Id__c.
    *                      If the existing position's last updated date is more recent, it updates the record. Otherwise, it removes the new position.
    * @param posnLst     : List of Position__c objects to be checked for duplicates or updates against existing positions.
@@ -325,31 +325,44 @@ public with sharing class JoobleCallout {
       ]
     );
 
+    Map<String, Id> extIdToPosIdMap = new Map<String, Id>();
+    for (Position__c posn : existingPosnMap.values()) {
+      if (posn.External_System_Id__c != null) {
+        extIdtoPosIdMap.put(posn.External_System_Id__c, posn.Id);
+      }
+    }
     // Loop through the list of new positions and compare them with the existing positions in Salesforce
     for (Integer i = 0; i < posnLst.size(); i++) {
-      for (Id posnId : existingPosnMap.keySet()) {
-        Position__c mapPosn = existingPosnMap.get(posnId); // Get the existing position record
-        // Check if the External_System_Id__c matches between the new and existing position
+      // Check if the External_System_Id__c matches between the new and existing position
+      Position__c existingPosition;
+      if (extIdToPosIdMap.keySet().contains(posnLst[i].External_System_Id__c)) {
+        Id posnId = extIdToPosIdMap.get(posnLst[i].External_System_Id__c);
+        existingPosition = existingPosnMap.get(posnId);
+      }
+      // If the Reported_Last_Updated__c is the same, remove the new position
+      if (
+        existingPosition != null &&
+        existingPosition.Reported_Last_Updated__c ==
+        posnLst[i].Reported_Last_Updated__c
+      ) {
+        posnLst.remove(i); // Remove the duplicate position
+      } else {
+        // If the existing position is more recent, update the new position with the existing record's ID
         if (
-          mapPosn.External_System_Id__c != null &&
-          posnLst[i].External_System_Id__c != null &&
-          mapPosn.External_System_Id__c.equals(posnLst[i].External_System_Id__c)
+          existingPosition != null &&
+          existingPosition.Reported_Last_Updated__c <
+          posnLst[i].Reported_Last_Updated__c
         ) {
-          // If the Reported_Last_Updated__c is the same, remove the new position
-          if (
-            mapPosn.Reported_Last_Updated__c ==
-            posnLst[i].Reported_Last_Updated__c
-          ) {
-            posnLst.remove(i); // Remove the duplicate position
-          } else {
-            // If the existing position is more recent, update the new position with the existing record's ID
-            if (
-              mapPosn.Reported_Last_Updated__c >
-              posnLst[i].Reported_Last_Updated__c
-            ) {
-              posnLst[i].Id = mapPosn.Id; // Update the new position's ID to match the existing one
-            }
-          }
+          existingPosition.Reported_Last_Updated__c = posnLst[i]
+            .Reported_Last_Updated__c;
+          existingPosition.Salary__c = posnLst[i].Salary__c;
+          existingPosition.Position_Description__c = posnLst[i]
+            .Position_Description__c;
+          existingPosition.Geographic_Job_Location__c = posnLst[i]
+            .Geographic_Job_Location__c;
+          posnLst.add(existingPosition);
+          posnLst.remove(i);
+          // Update the old position with updated info
         }
       }
     }

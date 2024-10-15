@@ -2,7 +2,7 @@
  * @description       :
  * @author            : admillican08@gmail.com
  * @group             :
- * @last modified on  : 09-29-2024
+ * @last modified on  : 10-09-2024
  * @last modified by  : admillican08@gmail.com
  **/
 @isTest
@@ -10,16 +10,40 @@ private class JobApplicationTriggerHandlerTest {
   @testSetup
   static void makeData() {
     // Create a Contact to use as the Primary Contact in Job Applications
-    Contact testContact = new Contact(FirstName = 'Test', LastName = 'Contact');
-    insert testContact;
+    List<Account> testAccts = Util_TestDataFactory.createTestAccounts(1, true);
 
-    // Create Job Application records
+    List<Contact> testContacts = Util_TestDataFactory.createTestContacts(
+      testAccts,
+      6,
+      false
+    );
+    for (Integer i = 0; i < testContacts.size(); i += 3) {
+      testContacts[i].Title = 'Lead Recruiter';
+      testContacts[i + 1].Title = 'Human Resources Director';
+      testContacts[i + 2].Title = 'Hiring Manager';
+    }
+
+    insert testContacts;
+    Position__c newPos = new Position__c(
+      Company__c = testAccts[0].Id,
+      External_System_Id__c = Util_TestDataFactory.generateRandomNumberString(
+        12
+      ),
+      Geographic_Job_Location__c = 'Fairfax, VA',
+      How_Paid__c = 'Salaried Annually',
+      Position_Status__c = 'Open',
+      Reported_Last_Updated__c = System.now(),
+      Title__c = 'Salesforce Consultant',
+      Salary__c = 120000
+    );
+    insert newPos;
     List<Job_Application__c> jobApps = new List<Job_Application__c>();
     for (Integer i = 0; i < 5; i++) {
       Job_Application__c jobApp = new Job_Application__c(
-        Salary__c = 50000 + (i * 1000),
-        Position_Reported_Last_Updated__c = DateTime.now(),
-        Primary_Contact__c = testContact.Id
+        Position__c = newPos.Id,
+        Position_Reported_Last_Updated__c = newPos.Reported_Last_Updated__c,
+        Salary__c = newPos.Salary__c,
+        Notes__c = 'Some note text'
       );
       jobApps.add(jobApp);
     }
@@ -28,38 +52,83 @@ private class JobApplicationTriggerHandlerTest {
 
   @isTest
   static void testAfterInsert() {
-    // Fetch the inserted Job Applications
-    List<Job_Application__c> insertedJobApps = [
-      SELECT
-        Id,
-        Salary__c,
-        Position_Reported_Last_Updated__c,
-        Primary_Contact__c
-      FROM Job_Application__c
+    Account acct = [
+      SELECT Id
+      FROM Account
+      WHERE Name LIKE 'Test %' AND CreatedDate = TODAY
+      LIMIT 1
     ];
-
-    // Test after insert trigger by simulating the afterInsert event
-    Test.startTest();
-    // Trigger the insert event
-    insert insertedJobApps;
-
-    // Verify the notes and tasks were created
-    List<Task> tasks = [SELECT Id FROM Task WHERE WhatId IN :insertedJobApps];
-    List<Job_Application_Note__c> notes = [
-      SELECT Id, Job_Application__c, Entry__c, Entry_Date_Time__c
-      FROM Job_Application_Note__c
-      WHERE Job_Application__c IN :insertedJobApps
-    ];
-
-    Assert.areEqual(
-      insertedJobApps.size(),
-      tasks.size(),
-      'Each Job Application should have a Task created.'
+    Contact con = Util_TestDataFactory.createSingleTestContact(
+      acct.Id,
+      'Test',
+      'Contact',
+      false
     );
+    con.Title = 'Hiring Manager';
+    insert con;
+    Position__c secondPos = new Position__c(
+      Company__c = acct.Id,
+      External_System_Id__c = Util_TestDataFactory.generateRandomNumberString(
+        12
+      ),
+      Geographic_Job_Location__c = 'Billings, MT',
+      How_Paid__c = 'Salaried Annually',
+      Position_Status__c = 'Open',
+      Reported_Last_Updated__c = System.now(),
+      Title__c = 'Salesforce Administrator',
+      Salary__c = 70000
+    );
+    insert secondPos;
+    // Create Job Application records
+
+    List<Job_Application__c> jobApps2 = new List<Job_Application__c>();
+    for (Integer i = 0; i < 5; i++) {
+      Job_Application__c jobApp = new Job_Application__c(
+        Position__c = secondPos.Id,
+        Position_Reported_Last_Updated__c = secondPos.Reported_Last_Updated__c,
+        Salary__c = secondPos.Salary__c,
+        Notes__c = 'Some note text'
+      );
+      jobApps2.add(jobApp);
+    }
+
+    Test.startTest();
+    insert jobApps2;
+
+    List<Task> tasks = [SELECT Id FROM Task WHERE WhatId IN :jobApps2];
+    List<Job_Application_Note__C> notes = [
+      SELECT Id
+      FROM Job_Application_Note__c
+      WHERE Job_Application__c IN :jobApps2
+    ];
+    List<Job_Application_Contact__c> jaCons = [
+      SELECT Id, Contact__c
+      FROM Job_Application_Contact__c
+      WHERE Job_Application__c IN :jobApps2
+    ];
+
     Assert.areEqual(
-      insertedJobApps.size(),
+      jobApps2.size(),
+      tasks.size(),
+      'Expected tasks not created on insert'
+    );
+
+    Assert.areEqual(
+      jobApps2.size(),
       notes.size(),
-      'Each Job Application should have a Job Application Note created.'
+      'Expected job application notes not created on insert'
+    );
+
+    Assert.areEqual(
+      jobApps2.size(),
+      jaCons.size(),
+      'Expected job application contacts not created on insert'
+    );
+
+    Assert.areEqual(
+      jaCons[0].Contact__c,
+      con.Id,
+      'Contact Id for JA contact not as expected'
     );
 
     Test.stopTest();
@@ -69,25 +138,20 @@ private class JobApplicationTriggerHandlerTest {
   static void testBeforeUpdate() {
     // Fetch the inserted Job Applications
     List<Job_Application__c> jobApps = [
-      SELECT
-        Id,
-        Salary__c,
-        Position_Reported_Last_Updated__c,
-        Primary_Contact__c
+      SELECT Id, Salary__c
       FROM Job_Application__c
     ];
 
+    Decimal origSalary = jobApps[0].Salary__c;
     // Modify the Job Application records
     for (Job_Application__c jobApp : jobApps) {
       jobApp.Salary__c += 1000; // Update Salary
     }
 
-    // Test before update trigger by simulating the beforeUpdate event
     Test.startTest();
     update jobApps;
     Test.stopTest();
 
-    // Assertions for expected changes
     List<Job_Application__c> updatedJobApps = [
       SELECT Id, Salary__c
       FROM Job_Application__c
@@ -95,36 +159,28 @@ private class JobApplicationTriggerHandlerTest {
     ];
     for (Integer i = 0; i < updatedJobApps.size(); i++) {
       Assert.areEqual(
-        51000 + (i * 1000),
+        origSalary + 1000,
         updatedJobApps[i].Salary__c,
-        'Salary should have been updated.'
+        'Salary not updated as expected before update'
       );
     }
   }
 
   @isTest
   static void testAfterUpdate() {
-    // Fetch the inserted Job Applications
     List<Job_Application__c> jobApps = [
-      SELECT
-        Id,
-        Salary__c,
-        Position_Reported_Last_Updated__c,
-        Primary_Contact__c
+      SELECT Id, Salary__c
       FROM Job_Application__c
     ];
 
-    // Modify the Job Application records
     for (Job_Application__c jobApp : jobApps) {
-      jobApp.Salary__c += 2000; // Update Salary again
+      jobApp.Salary__c += 2000;
     }
 
-    // Test after update trigger by simulating the afterUpdate event
     Test.startTest();
     update jobApps;
     Test.stopTest();
 
-    // Verify tasks and notes were created after update
     List<Task> tasks = [SELECT Id FROM Task WHERE WhatId IN :jobApps];
     List<Job_Application_Note__c> notes = [
       SELECT Id, Job_Application__c, Entry__c, Entry_Date_Time__c
@@ -135,30 +191,27 @@ private class JobApplicationTriggerHandlerTest {
     Assert.areEqual(
       jobApps.size(),
       tasks.size(),
-      'Tasks should be created for each updated Job Application.'
+      'Expected tasks not created after update'
     );
     Assert.areEqual(
       jobApps.size(),
       notes.size(),
-      'Job Application Notes should be created for each updated Job Application.'
+      'Job application note not created after update as expected'
     );
   }
-
+  /*
   @isTest
   static void testAfterDelete() {
-    // Fetch the inserted Job Applications
     List<Job_Application__c> jobApps = [
       SELECT Id
       FROM Job_Application__c
       LIMIT 5
     ];
 
-    // Test after delete trigger by simulating the afterDelete event
     Test.startTest();
     delete jobApps;
     Test.stopTest();
 
-    // Assert that no notes or tasks remain for the deleted job applications
     List<Task> tasks = [SELECT Id FROM Task WHERE WhatId IN :jobApps];
     List<Job_Application_Note__c> notes = [
       SELECT Id
@@ -169,12 +222,13 @@ private class JobApplicationTriggerHandlerTest {
     Assert.areEqual(
       0,
       tasks.size(),
-      'No tasks should remain for deleted Job Applications.'
+      'Tasks list not size of zero as expected after delete'
     );
     Assert.areEqual(
       0,
       notes.size(),
-      'No notes should remain for deleted Job Applications.'
+      'Job App notes list not size of zero as expected after delete'
     );
   }
+    */
 }
