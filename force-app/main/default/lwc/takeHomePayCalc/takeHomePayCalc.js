@@ -24,7 +24,7 @@ export default class takeHomePayCalc extends LightningElement {
   addtlPosttaxDeductAmt = 0.0;
   extraTaxPerPayPeriod = 0.0;
   addtlIncome = 0.0;
-  yrlyTaxableInc = 0.0;
+  taxableInc= 0.0;
   maxTaxBracket = "";
   medicareRate = null;
   socSecRate = null;
@@ -49,8 +49,7 @@ export default class takeHomePayCalc extends LightningElement {
   showHourly = false;
   hasFilingStatus = false;
 
-
-  @wire(getRecord, { recordId: "$recordId", fields: FIELDS })
+    @wire(getRecord, { recordId: "$recordId", fields: FIELDS })
   loadFields({ error, data }) {
     if (error) {
       this.error = error;
@@ -60,12 +59,92 @@ export default class takeHomePayCalc extends LightningElement {
       this.salAmt = getFieldValue(data, SALARY_FIELD);
       console.log('**howPaidVal: ' + this.howPaidVal);
       console.log('**sal Amt: ' + this.salAmt);
-      if (this.howPaidVal === "Salaried Annually") {
+      if (this.howPaidVal === "Salaried") {
         this.showSalaried = true;
       } else {
         this.showHourly = true;
       }
     }
+  }
+
+async showButtonIfAllValuesPopulated() {
+    if (
+      this.howPaidVal !== null &&
+      ((this.howPaidVal === "Hourly" &&
+        this.hrsWkd !== null &&
+        this.payFrequencyVal !== null &&
+        this.hrlyRate !== null) ||
+        (this.howPaidVal === "Salaried" &&
+          this.payFrequencyVal !== null &&
+          this.salAmt !== null)) &&
+      this.filingStatusVal !== null &&
+      this.fedExemptValue !== null &&
+      this.medExemptValue !== null &&
+      this.socExemptValue !== null &&
+      this.isSenior !== null &&
+      this.isBlind !== null
+    ) {
+      this.showCalculate = true;
+      this.calculateTaxableIncome();
+      await this.handleGetMaxTaxBracketName();
+      console.log("**Max tax bracket name: " + this.maxTaxBracket);
+    } else {
+      this.showCalculate = false;
+      this.maxTaxBracket = null;
+      this.taxableInc = 0.0;
+    }
+  }
+
+  showSalariedOptions() {
+    if (this.howPaidVal === "Salaried") {
+      this.showSalaried = true;
+      this.showLump = false;
+    } else if (this.howPaidVal === "Hourly") {
+      this.showHourly = true;
+      this.showSalaried = false;
+    } else {
+      this.showHourly = false;
+      this.showSalaried = false;
+    }
+  }
+
+  get howPaidOptions() {
+    return [
+      { label: "Hourly", value: "Hourly" },
+      { label: "Salaried", value: "Salaried" }
+    ];
+  }
+
+  get payFreqOptions() {
+    return [
+      { label: "Weekly", value: "Weekly" },
+      { label: "Biweekly", value: "Biweekly" },
+      { label: "Semimonthly", value: "SemiM" },
+      { label: "Monthly", value: "Monthly" },
+      { label: "Quarterly", value: "Quarterly" },
+      { label: "SemiYearly", value: "SemiY" },
+      { label: "Yearly", value: "Yearly" }
+    ];
+  }
+
+  get filingStatusOptions() {
+    return [
+      { label: "Single", value: "SIN" },
+      { label: "Married Filing Jointly", value: "MFJ" },
+      { label: "Married Filling Separately", value: "MFS" },
+      { label: "Head of Household", value: "HOH" }
+    ];
+  }
+
+  get radioOptions() {
+    return [
+      { label: "Yes", value: "Y" },
+      { label: "No", value: "N" }
+    ];
+  }
+
+  getCurrentYear() {
+    this.currYr = new Date().getFullYear();
   }
 
   @wire(getStandardDeduction, {
@@ -117,86 +196,29 @@ export default class takeHomePayCalc extends LightningElement {
       console.log("**Error from getMedicareRate: " + this.error);
     }
   }
+  
+  
+  @wire(getRecord, { recordId: "$recordId", fields: FIELDS })
+  loadFields({ error, data }) {
+    if (error) {
+      this.error = error;
+      console.log(error);
+    } else if (data) {
+      this.howPaidVal = getFieldValue(data, PAID_FIELD);
+      this.salAmt = getFieldValue(data, SALARY_FIELD);
+      console.log('**howPaidVal: ' + this.howPaidVal);
+      console.log('**sal Amt: ' + this.salAmt);
+      if (this.howPaidVal === "Salaried") {
+        this.showSalaried = true;
+      } else {
+        this.showHourly = true;
+      }
+    }
+  }
+
 
   connectedCallback() {
     this.getCurrentYear();
-  }
-
-  async showButtonIfAllValuesPopulated() {
-    if (
-      this.howPaidVal !== null &&
-      ((this.howPaidVal === "Hourly" &&
-        this.hrsWkd !== null &&
-        this.payFrequencyVal !== null &&
-        this.hrlyRate !== null) ||
-        (this.howPaidVal === "Salaried Annually" &&
-          this.payFrequencyVal !== null &&
-          this.salAmt !== null)) &&
-      this.filingStatusVal !== null &&
-      this.fedExemptValue !== null &&
-      this.medExemptValue !== null &&
-      this.socExemptValue !== null &&
-      this.isSenior !== null &&
-      this.isBlind !== null
-    ) {
-      this.showCalculate = true;
-      this.calculateYearlyTaxableIncome();
-      this.maxTaxBracket = await this.handleGetMaxTaxBracketName();
-    } else {
-      this.showCalculate = false;
-    }
-  }
-
-  showSalariedOptions() {
-    if (this.howPaidVal === "Salaried Annually") {
-      this.showSalaried = true;
-      this.showHourly = false;
-    } else if (this.howPaidVal === "Hourly") {
-      this.showHourly = true;
-      this.showSalaried = false;
-    } else {
-      this.showHourly = false;
-      this.showSalaried = false;
-    }
-  }
-
-  get howPaidOptions() {
-    return [
-      { label: "Hourly", value: "Hourly" },
-      { label: "Salaried Annually", value: "Salaried Annually" }
-    ];
-  }
-
-  get payFreqOptions() {
-    return [
-      { label: "Weekly", value: "Weekly" },
-      { label: "Biweekly", value: "Biweekly" },
-      { label: "Semimonthly", value: "SemiM" },
-      { label: "Monthly", value: "Monthly" },
-      { label: "Quarterly", value: "Quarterly" },
-      { label: "SemiYearly", value: "SemiY" },
-      { label: "Yearly", value: "Yearly" }
-    ];
-  }
-
-  get filingStatusOptions() {
-    return [
-      { label: "Single", value: "SIN" },
-      { label: "Married Filing Jointly", value: "MFJ" },
-      { label: "Married Filling Separately", value: "MFS" },
-      { label: "Head of Household", value: "HOH" }
-    ];
-  }
-
-  get radioOptions() {
-    return [
-      { label: "Yes", value: "Y" },
-      { label: "No", value: "N" }
-    ];
-  }
-
-  getCurrentYear() {
-    this.currYr = new Date().getFullYear();
   }
 
   handleHowPaidChange(event) {
@@ -220,12 +242,9 @@ export default class takeHomePayCalc extends LightningElement {
         filing,
         event.detail.value
       );
-      this.showButtonIfAllValuesPopulated();
     } else {
       this.filingStatusVal = event.detail.value;
-      this.showButtonIfAllValuesPopulated();
     }
-
     this.hasFilingStatus = true;
     console.log(
       "**filingStatusVal after event capture: " + this.filingStatusVal
@@ -238,7 +257,7 @@ export default class takeHomePayCalc extends LightningElement {
     let value = Number(event.target.value);
     if (inputName === "salaryAmount") {
       this.salAmt = value;
-      console.log("**salary value " + this.salAmt);
+      console.log("**salAmt value " + this.salAmt);
       this.showButtonIfAllValuesPopulated();
     } else if (inputName === "hrsWorked") {
       this.hrsWkd = value;
@@ -284,6 +303,11 @@ export default class takeHomePayCalc extends LightningElement {
     this.showButtonIfAllValuesPopulated();
   }
 
+  handleStandardExemptChange(event) {
+    this.showDeduct = event.target.value;
+    console.log("**showDeduct: " + this.showDeduct);
+  }
+
   handleExemptSocChange(event) {
     this.socExemptValue = event.target.value;
     console.log("**socExemptValue: " + this.socExemptValue);
@@ -322,18 +346,18 @@ export default class takeHomePayCalc extends LightningElement {
     }
   }
 
-  calculateGrossYrlyHourlySalary = () => {
-    this.salAmt = parseFloat(this.hrsWkd * this.hrlyRate * this.timesPerYear);
-    this.salAmt = this.salAmt.toFixed(2);
-    console.log("**Gross salamt amt for hourly: " + this.salAmt);
+  calculateGrossHourlySalary = () => {
+    this.salAmt = Number(this.hrsWkd * this.hrlyRate * this.timesPerYear);
+    console.log("**Gross salary amt for hourly: " + this.salAmt);
+    return this.salAmt;
   };
 
+  
    calculateGrossSalaryDivided = () => {
-    this.grossSalDiv = (this.salAmt/this.timesPerYear);
+    this.grossSalDiv = parseFloat(this.salAmt/this.timesPerYear);
     this.grossSalDiv = this.grossSalDiv.toFixed(2);
     console.log("**Gross salary amount divided: " + this.grossSalDiv);
   };
-
 
   convertPayFrequencyToNumberPerYear() {
     switch (this.payFrequencyVal) {
@@ -364,123 +388,82 @@ export default class takeHomePayCalc extends LightningElement {
     console.log("**timesPerYear: " + this.timesPerYear);
   }
 
-
-  calculateYearlyPretaxDeductions() {
-    const yrlyPretaxDeduct = this.addtlPretaxDeductAmt * this.timesPerYear;
-    console.log("**yrlyPretaxDeductionAmt: " + yrlyPretaxDeduct.toFixed(2));
-    return yrlyPretaxDeduct.toFixed(2);
+  calculatePayPeriodAmtForAnnualSalary() {
+    let payPeriodAmt = 0.0;
+    payPeriodAmt = parseFloat(this.salAmt / this.convertPayFrequencyToNumberPerYear());
+       
+    return payPeriodAmt;
   }
 
-  calculateYearlyPosttaxDeductions() {
-    const yrlyPosttaxDeduct = this.addtlPosttaxDeductAmt * this.timesPerYear;
-    console.log("**yrlyPosttaxDeductionAmt: " + yrlyPosttaxDeduct);
-    return yrlyPosttaxDeduct.toFixed(2);
+  calculatePretaxDeductions() {
+    let yrlyPretaxDeduct = this.addtlPretaxDeductAmt * this.timesPerYear;
+   yrlyPretaxDeduct === undefined ? 0.0 : parseFloat(yrlyPretaxDeduct);
+    return yrlyPretaxDeduct;
   }
 
-  calculateYearlyTaxableIncome() {
-    if (this.salAmt === null && this.howPaidVal === "Hourly") {
-      this.calculateGrossYrlyHourlySalary();
+  calculatePosttaxDeductions() {
+    let yrlyPosttaxDeduct = this.addtlPosttaxDeductAmt * this.timesPerYear;
+    yrlyPosttaxDeduct === undefined ? 0.0 : parseFloat(yrlyPosttaxDeduct);
+    return yrlyPosttaxDeduct;
+  }
+
+  calculateTaxableIncome() {
+    if (this.salAmt !== null && this.howPaidVal === "Hourly") {
+      this.calculateGrossHourlySalary();
+    } else if (this.salAmt !== null && this.howPaidVal === "Salaried"){
+      this.calculateGrossSalaryDivided();
     }
-    console.log('**salAmt from calculateYrlyTaxableIncome: ' + this.salAmt);
-    const deduct = parseFloat(this.handleItemizedDeduction());
-    const preTax = parseFloat(this.calculateYearlyPretaxDeductions());
-    this.yrlyTaxableInc = Math.round(this.salAmt + this.addtlIncome - (deduct + preTax));
+    let deduct = this.handleItemizedDeduction();
+    this.taxableInc =
+      parseFloat(this.salAmt +
+      this.addtlIncome -
+      (deduct + this.calculatePretaxDeductions()));
+    console.log(
+      "**Taxable income from calculateTaxableIncome: " + this.taxableInc
+    );
   }
 
-  calculateExtraFedTaxPaid() {
-    const extraTaxPaid = Math.round(
-      this.extraTaxPerPayPeriod * this.timesPerYear
-    );
-    console.log("**Extra tax paid: " + extraTaxPaid);
+  calculateExtraTaxPaid() {    
+    let extraTaxPaid = this.extraTaxPerPayPeriod * this.timesPerYear;
+    extraTaxPaid === undefined ? 0.0 : parseFloat(extraTaxPaid);
     return extraTaxPaid;
   }
 
-  calculateYrlySocSecTax() {
-    if (this.socExemptValue === "Y") {
-      return 0.0;
-    } else {
-      let socSecTax = 0.0; 
-      if (this.yrlyTaxableInc < this.socSecMaxVal) {
-        socSecTax = (this.socSecRate / 100) * this.yrlyTaxableInc;
-      } else {
-        socSecTax = (this.socSecRate / 100) * this.socSecMaxVal;
-      }
-      return Math.round(socSecTax);
+  
+  calculateMedicareTax() {
+    let mdcrTax = 0.0;
+     if(this.medExemptValue === "N"){
+      mdcrTax = parseFloat((this.medicareRate / 100) * this.taxableInc);
     }
+     console.log('**Medicare tax: ' + mdcrTax);
+    return mdcrTax;
+  }
+  
+  calculateSocialSecurityTax() {
+    let amtTxd = this.taxableInc - this.socSecMaxVal;
+    let ssTax = 0.0 ;
+    if (this.socExemptValue === "N") {
+         ssTax = (amtTxd <= 0) ? parseFloat((this.socSecRate / 100) * this.taxableInc) : parseFloat((this.socSecRate / 100) * amtTxd);
+    }
+    console.log('**Social sec tax: ' + ssTax);
+    return ssTax;
   }
 
-  calculateYrlyMedicareTax() {
-    if (this.medExemptValue === "Y") {
-      return 0.0;
-    } else {
-      let mdcrTax = (this.medicareRate / 100) * this.yrlyTaxableInc;
-      return Math.round(mdcrTax);
-    }
-  }
-
-  async calculateYrlyFederalTax() {
-    let federalTax = 0.0;
-    if (this.fedExemptValue === "Y") {
-      return federalTax;
-    } else {
-      let taxBrName = this.maxTaxBracket;
-      if (taxBrName !== null && taxBrName !== "") {
-        const strSize = taxBrName.length;
-        let maxInt = parseInt(taxBrName.charAt(strSize - 1));
-        let i = maxInt;
-        let currTaxRate =
-          await this.handleGetTaxRateForTaxBracketName(taxBrName);
-        let endingSal = this.yrlyTaxableInc;
-        let startingSal = await this.handleGetStartingSalary(taxBrName);
-        federalTax = await this.calculateTaxForBlock(
-          endingSal,
-          startingSal,
-          currTaxRate
-        );
-        do {
-          i--;
-          taxBrName = taxBrName.replace(i + 1, i);
-          //console.log("**taxBracketName : " + taxBrName);
-          currTaxRate = await this.handleGetTaxRateForTaxBracketName(taxBrName);
-          endingSal = await this.handleGetEndingSalary(taxBrName);
-          startingSal = await this.handleGetStartingSalary(taxBrName);
-          federalTax += await this.calculateTaxForBlock(
-            endingSal,
-            startingSal,
-            currTaxRate
-          );
-        } while (i > 0);
-      }
-      //console.log('**Local variable federalTax: ' + federalTax);
-      return Math.round(federalTax - this.calculateExtraFedTaxPaid());
-    }
-  }
-
-  calculateTaxForBlock(endingSal, startingSal, taxRate) {
-    let taxPercent = taxRate / 100;
-    //console.log("**Tax percent " + taxPercent);
-    let block = endingSal - startingSal;
-    //console.log("**Amount for block " + block);
-    let tax = taxPercent * block;
-    //console.log("**Tax for block: " + tax);
-    return tax;
-  }
 
   async handleGetMaxTaxBracketName() {
-    try{
-      let maxBracketName = await getTaxBracketName({
-      filingStatusVal: this.filingStatusVal,
-      taxableInc: this.yrlyTaxableInc,
-      currYr: this.currYr
-    });
-      console.log('**maxBracketName: ' + maxBracketName);
-      return maxBracketName;
-      } catch (error){
-        this.error = error;
-        console.log('**Error: ' + error);
-        return;
-      }
+    try {
+      this.maxTaxBracket = await getTaxBracketName({
+        filingStatusVal: this.filingStatusVal,
+        taxableInc: this.taxableInc,
+        currYr: this.currYr
+      });
+      this.error = undefined;
+
+    } catch (error) {
+      this.error = error;
+      console.log("**Error: " + error);
     }
+  }
 
   async handleGetStartingSalary(taxBrName) {
     try {
@@ -488,7 +471,7 @@ export default class takeHomePayCalc extends LightningElement {
         taxBrName: taxBrName,
         currYr: this.currYr
       });
-      //console.log("**Starting salary value: " + startingSal);
+
       return startingSal;
     } catch (error) {
       console.log("**Error: " + error);
@@ -502,7 +485,7 @@ export default class takeHomePayCalc extends LightningElement {
         taxBrName: taxBrName,
         currYr: this.currYr
       });
-      //console.log("**Ending salary value: " + endingSal);
+  
       return endingSal;
     } catch (error) {
       console.log("**Error: " + error);
@@ -516,7 +499,7 @@ export default class takeHomePayCalc extends LightningElement {
         taxBrName: taxBrName,
         currYr: this.currYr
       });
-      //console.log("**Tax rate for this bracket: " + taxBracket);
+   
       this.error = undefined;
       return taxBracket;
     } catch (error) {
@@ -525,30 +508,85 @@ export default class takeHomePayCalc extends LightningElement {
     }
   }
 
-  async calculateYearlyTaxBurden(){
-    let tax = 0.0;
+  async calculateFederalTaxForAGivenBracket(taxBracket, endingSalary) {
+    if (taxBracket === null || taxBracket === "") {
+      return 0.0;
+    }
+    // the async work
+    const currentTaxRate =
+      await this.handleGetTaxRateForTaxBracketName(taxBracket);
+
+    const startingSalary = await this.handleGetStartingSalary(taxBracket);
+
+    endingSalary =
+      endingSalary !== null
+        ? endingSalary
+        : await this.handleGetEndingSalary(taxBracket);
+
+    return await this.calculateTaxForBlock(
+      endingSalary,
+      startingSalary,
+      currentTaxRate
+    );
+  }
+
+  async calculateFederalTax() {
+    const extraTax =   this.calculateExtraTaxPaid();
+    const taxBrackets = [];
+    const maxTaxBracketTax = parseFloat(await this.calculateFederalTaxForAGivenBracket(
+      this.maxTaxBracket,
+      this.taxableInc
+    ));
+    console.log('**max bracket tax: ' + maxTaxBracketTax);
+    const maxBracketNumber = parseInt(
+      this.maxTaxBracket.charAt(this.maxTaxBracket.length - 1)
+    );
+    
+    const brSubStr = this.maxTaxBracket.substring(0, 3) + " ";
+
+    for (let i = maxBracketNumber - 1; i >= 0; i--) {
+      taxBrackets.push(brSubStr + i);
+    }
+    const taxCalculationPromisesByBracket = taxBrackets.map(async (bracket) => {
+      return this.calculateFederalTaxForAGivenBracket(bracket, null);
+    });
+
+    const calculatedTaxes = await Promise.all(taxCalculationPromisesByBracket);
+    console.log('**calculated taxes in array: ' + calculatedTaxes);
+
+    let calcBracketTax = (calculatedTaxes.reduce((acc, tax) => parseFloat(acc + tax), 0.00)).toFixed(2);
+    calcBracketTax = Number(calcBracketTax);
+    console.log('**Full tax: '+ ((maxTaxBracketTax + calcBracketTax)-extraTax));
+
+    return ((maxTaxBracketTax + calcBracketTax)-extraTax).toFixed(2);
+  }
+
+   async calculateFullTaxes(){
     try{
-      this.fedTax = await this.calculateYrlyFederalTax();
-      console.log('**Yrly federal tax: ' + this.fedTax);
+      this.fedTax = await this.calculateFederalTax();
       this.error = undefined;
     } catch (error){
       this.error = error;
       console.log('**Error: ' + error);
     }
-    this.medTax = this.calculateYrlyMedicareTax();
-    console.log("**Medicare tax: " + this.medTax);
-    this.socSecTax = this.calculateYrlySocSecTax();
-    console.log("**Soc Sec tax: " + this. socSecTax);
-    tax = this.fedTax + this.medTax + this.socSecTax;
+    this.medTax = this.calculateMedicareTax();
+    this.socSecTax = this.calculateSocialSecurityTax();
+    const tax = parseFloat(this.fedTax + this.medTax + this.socSecTax).toFixed(2);
     return tax;
   }
-  
-  
+
+  async calculateTaxForBlock(endingSal, startingSal, taxRate) {
+    let taxPercent = taxRate / 100;
+    let block = endingSal - startingSal;
+    let tax = taxPercent * block;
+    return tax.toFixed(2);
+  }
+
   async handleClick(event) {
-    this.calculateGrossSalaryDivided();
-    this.calculateYearlyTaxableIncome();
-    const yrlyTax = (await this.calculateYearlyTaxBurden()).toFixed(2);
-    const yrlyTakeHome = this.salAmt - yrlyTax - this.calculateYearlyPretaxDeductions() - - this.calculateYearlyPosttaxDeductions();
+      this.calculateTaxableIncome();
+      const tax = await this.calculateFullTaxes();
+    console.log("**Yearly tax: " + tax);
+    const yrlyTakeHome = this.salAmt - this.fedTax - this.calculatePretaxDeductions() - this.calculatePosttaxDeductions();
     this.socSecTax = (this.socSecTax/this.timesPerYear).toFixed(2);
     this.medTax = (this.medTax/this.timesPerYear).toFixed(2);
     this.fedTax = (this.fedTax/this.timesPerYear).toFixed(2);

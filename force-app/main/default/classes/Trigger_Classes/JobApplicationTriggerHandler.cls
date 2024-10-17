@@ -2,7 +2,7 @@
  * @description       :
  * @author            : admillican08@gmail.com
  * @group             :
- * @last modified on  : 09-29-2024
+ * @last modified on  : 10-17-2024
  * @last modified by  : admillican08@gmail.com
  **/
 public with sharing class JobApplicationTriggerHandler extends TriggerHandler implements ItriggerHandler {
@@ -26,8 +26,7 @@ public with sharing class JobApplicationTriggerHandler extends TriggerHandler im
     };
     if (
       !TriggerHandler.isDisabled &&
-      !TriggerHandler.isExempt &&
-      !RecursiveChecker.hasRun(OBJ, afterInsMethods)
+      !TriggerHandler.isExempt
     ) {
       // Cast the Trigger.NewMap Map of Id, sObjects to Map of Id, Job Application to pass to Business Logic classes
       System.debug(
@@ -39,7 +38,7 @@ public with sharing class JobApplicationTriggerHandler extends TriggerHandler im
       newMethods.createTasksForStatus(null, newJobAppMap);
       newMethods.createJobApplicationContacts(null, newJobAppMap);
       newMethods.createJobApplicationNotes(null, newJobAppMap);
-      RecursiveChecker.addMethodNames(OBJ, afterInsMethods);
+     // RecursiveChecker.addMethodNames(OBJ, afterInsMethods);
     } else {
       System.debug(
         '*** JobApplicationTriggerHandler is disabled or afterInsert methods have already run ***'

@@ -2,7 +2,7 @@
  * @description       :
  * @author            : admillican08@gmail.com
  * @group             :
- * @last modified on  : 09-26-2024
+ * @last modified on  : 10-17-2024
  * @last modified by  : admillican08@gmail.com
  **/
 @isTest
@@ -30,7 +30,7 @@ private class JobApplicationCloserBatchTest {
       Title__c = 'Salesforce Analyst',
       Position_Status__c = 'Open',
       Company__c = test2.Id,
-      How_Paid__c = 'Salaried Annually'
+      How_Paid__c = 'Salaried'
     );
     insert testPos2;
 
@@ -48,7 +48,7 @@ private class JobApplicationCloserBatchTest {
     Job_Application__c jobApp2 = new Job_Application__c(
       Position__c = testPos2.Id,
       Company__c = test2.Id,
-      How_Paid__c = 'Salaried Annually',
+      How_Paid__c = 'Salaried',
       Application_Status__c = 'Closed',
       Follow_up_Date__c = System.today().addDays(-10),
       Closed_by_Automated_Process__c = false

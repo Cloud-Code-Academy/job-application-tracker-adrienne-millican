@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : admillican08@gmail.com
  * @group             : 
- * @last modified on  : 10-09-2024
+ * @last modified on  : 10-17-2024
  * @last modified by  : admillican08@gmail.com
 **/
 @isTest
@@ -15,7 +15,7 @@ public class JobApplicationCreatorBatchSchedulerTest {
       Company__c = acct.Id,
       External_System_Id__c = '24420974192',
       Geographic_Job_Location__c = 'Richardson, TX',
-      How_Paid__c = 'Salaried Annually',
+      How_Paid__c = 'Salaried',
       Position_Status__c = 'Open',
       Reported_Last_Updated__c = System.now(),
       Title__c = 'Salesforce Architect',

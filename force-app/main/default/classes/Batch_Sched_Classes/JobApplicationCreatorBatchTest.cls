@@ -2,7 +2,7 @@
  * @description       :
  * @author            : admillican08@gmail.com
  * @group             :
- * @last modified on  : 09-26-2024
+ * @last modified on  : 10-17-2024
  * @last modified by  : admillican08@gmail.com
  **/
 @isTest
@@ -29,7 +29,7 @@ private class JobApplicationCreatorBatchTest {
     Position__c pos2 = new Position__c(
       Company__c = testAccount.Id, // Reference to the account
       Geographic_Job_Location__c = 'Ames, IA',
-      How_Paid__c = 'Salaried Annually',
+      How_Paid__c = 'Salaried',
       Title__c = 'Salesforce Manager',
       Position_Description__c = 'Manage a great Salesforce team remotely!',
       Position_Link__c = 'https://companyB.com/jobs/2',
@@ -106,7 +106,7 @@ private class JobApplicationCreatorBatchTest {
     Position__c pos3 = new Position__c(
       Company__c = testAccount.Id, // Reference to the account
       Geographic_Job_Location__c = 'Boston, MA',
-      How_Paid__c = 'Salaried Annually',
+      How_Paid__c = 'Salaried',
       Title__c = 'Salesforce Analyst',
       Position_Link__c = 'https://companyC.com/jobs/3',
       Salary__c = 120000,

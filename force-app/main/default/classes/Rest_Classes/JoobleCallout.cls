@@ -2,7 +2,7 @@
  * @description       : This class handles the integration with the Jooble API.
  *                      It fetches job positions from Jooble, processes the response, and inserts positions into Salesforce.
  * @author            : admillican08@gmail.com
- * @last modified on  : 10-03-2024
+ * @last modified on  : 10-17-2024
  * @last modified by  : admillican08@gmail.com
  **/
 public with sharing class JoobleCallout {
@@ -86,7 +86,7 @@ public with sharing class JoobleCallout {
     public String title;
     public String location;
     public String snippet;
-    public Decimal salary;
+   // public Decimal salary;
     public String source;
     public String type;
     public String link;
@@ -145,7 +145,7 @@ public with sharing class JoobleCallout {
           'United States';
         posn.Position_Description__c = jooblePos?.snippet ??
           'No Description Provided';
-        posn.Salary__c = jooblePos?.salary;
+        posn.Salary__c = 100000;//jooblePos?.salary;
         posn.Source__c = jooblePos?.source;
         posn.Time_Type__c = jooblePos?.type;
         posn.Position_Link__c = jooblePos?.link;
