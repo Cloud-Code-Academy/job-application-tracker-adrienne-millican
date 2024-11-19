@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Job Application Contact</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Job Application Contacts</value>
+    </caseValues>
+    <fields>
+        <help><!-- The contact to which the Job Application Contact is related --></help>
+        <label><!-- Contact --></label>
+        <name>Contact__c</name>
+        <relationshipLabel><!-- Job Application Contacts --></relationshipLabel>
+    </fields>
+    <fields>
+        <help><!-- The accountid to which the parent Job Application is related --></help>
+        <label><!-- Job Application Company Id --></label>
+        <name>Job_Application_Company_Id__c</name>
+    </fields>
+    <fields>
+        <help><!-- The role the contact has with regards to the job application --></help>
+        <label><!-- Job Application Role --></label>
+        <name>Job_Application_Role__c</name>
+        <picklistValues>
+            <masterLabel>Hiring Manager</masterLabel>
+            <translation><!-- Hiring Manager --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Human Resources</masterLabel>
+            <translation><!-- Human Resources --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Interviewer</masterLabel>
+            <translation><!-- Interviewer --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Other Company Contact</masterLabel>
+            <translation><!-- Other Company Contact --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Recruiter</masterLabel>
+            <translation><!-- Recruiter --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- Job Application --></label>
+        <name>Job_Application__c</name>
+        <relationshipLabel><!-- Job Application Contacts --></relationshipLabel>
+    </fields>
+    <fields>
+        <help><!-- The indicator whether the contact is the primary contact for the job application --></help>
+        <label><!-- Primary JA Contact? --></label>
+        <name>Primary_JA_Contact__c</name>
+    </fields>
+    <fields>
+        <help><!-- The job application contact&apos;s job title --></help>
+        <label><!-- Title --></label>
+        <name>Title__c</name>
+    </fields>
+    <layouts>
+        <layout>Job Application Contact Layout</layout>
+        <sections>
+            <label><!-- Custom Links --></label>
+            <section>Custom Links</section>
+        </sections>
+    </layouts>
+    <startsWith>Consonant</startsWith>
+    <validationRules>
+        <errorMessage><!-- The Contact&apos;s Account must be the same as the Job Application&apos;s Company (Account) --></errorMessage>
+        <name>Contact_Company_Must_Equal_JA_Company</name>
+    </validationRules>
+</CustomObjectTranslation>

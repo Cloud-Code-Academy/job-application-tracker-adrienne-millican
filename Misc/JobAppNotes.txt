@@ -1,0 +1,17 @@
+Title
+Job_Location__c
+Position_Description__c
+Salary__c
+Source__c
+Time_Type__c
+Position_Link__c
+Company_Name__c
+Reported_Last_Updated__c
+External_System_Id
+
+List<Job_Application__c> jobApps = [SELECT Id from Job_Application__c];
+delete jobApps;
+List<Position__c> posn = [SELECT Id from Position__c];
+delete posn;
+
+JoobleCallout.createNewPositionsFromJooble();

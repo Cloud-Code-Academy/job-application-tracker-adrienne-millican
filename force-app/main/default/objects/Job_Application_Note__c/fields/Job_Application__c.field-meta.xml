@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Job_Application__c</fullName>
+    <description>The Job Application record to which this note belongs</description>
+    <inlineHelpText>The Job Application record to which this note belongs</inlineHelpText>
+    <label>Job Application</label>
+    <referenceTo>Job_Application__c</referenceTo>
+    <relationshipLabel>Notes</relationshipLabel>
+    <relationshipName>JA_Notes</relationshipName>
+    <relationshipOrder>0</relationshipOrder>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+</CustomField>

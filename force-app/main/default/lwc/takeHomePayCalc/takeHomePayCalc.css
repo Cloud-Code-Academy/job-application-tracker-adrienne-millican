@@ -1,0 +1,36 @@
+.takeHomeText{
+    font-weight:bold;
+    font-size: medium;
+    align-items: left;
+    background-color: white;
+}
+
+.subHeadText{
+    font-size: medium;
+    font-weight: normal;
+    align-items: left;
+    margin-left: 15px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.labelText {
+    font-size: small;
+    font-weight: bold;
+    align-items: left;
+    margin-top: 15px;
+}
+
+.resultText {
+    font-size: small;
+    font-weight: bold;
+    align-items: left;
+    margin-top: 20px;
+    margin-bottom: 15px;
+    background-color: white;
+}
+
+
+.strong-text{
+    font-weight: bold
+}

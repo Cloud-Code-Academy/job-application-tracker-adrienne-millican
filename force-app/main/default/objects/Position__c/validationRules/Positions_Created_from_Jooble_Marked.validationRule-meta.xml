@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Positions_Created_from_Jooble_Marked</fullName>
+    <active>true</active>
+    <description>Positions created from the Jooble integration need to be marked</description>
+    <errorConditionFormula>ISCHANGED(Created_by_Jooble__c)  &amp;&amp;
+PRIORVALUE(Created_by_Jooble__c) == TRUE &amp;&amp;
+(Created_by_Jooble__c) == FALSE &amp;&amp;
+NOT($Permission.Rule_Exempt)</errorConditionFormula>
+    <errorDisplayField>Created_by_Jooble__c</errorDisplayField>
+    <errorMessage>A position created through the Jooble integration must be indicated as such</errorMessage>
+</ValidationRule>

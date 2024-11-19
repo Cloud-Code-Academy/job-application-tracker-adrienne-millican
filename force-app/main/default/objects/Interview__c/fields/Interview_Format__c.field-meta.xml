@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Interview_Format__c</fullName>
+    <description>The format in which the interview will be conducted</description>
+    <inlineHelpText>The format in which the interview will be conducted</inlineHelpText>
+    <label>Interview Format</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>In Person</fullName>
+                <default>false</default>
+                <label>In Person</label>
+            </value>
+            <value>
+                <fullName>Teleconference</fullName>
+                <default>false</default>
+                <label>Teleconference</label>
+            </value>
+            <value>
+                <fullName>Telephone</fullName>
+                <default>false</default>
+                <label>Telephone</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

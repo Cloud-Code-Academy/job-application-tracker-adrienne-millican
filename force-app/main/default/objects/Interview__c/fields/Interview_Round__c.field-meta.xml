@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Interview_Round__c</fullName>
+    <description>The indicator of which round of interviews with the applicant this represents</description>
+    <inlineHelpText>The indicator of which round of interviews with the applicant this represents</inlineHelpText>
+    <label>Interview Round</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>First</fullName>
+                <default>false</default>
+                <label>First</label>
+            </value>
+            <value>
+                <fullName>Second</fullName>
+                <default>false</default>
+                <label>Second</label>
+            </value>
+            <value>
+                <fullName>Third</fullName>
+                <default>false</default>
+                <label>Third</label>
+            </value>
+            <value>
+                <fullName>Fourth</fullName>
+                <default>false</default>
+                <label>Fourth</label>
+            </value>
+            <value>
+                <fullName>Fifth</fullName>
+                <default>false</default>
+                <label>Fifth</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

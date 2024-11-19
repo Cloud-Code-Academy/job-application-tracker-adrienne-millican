@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Exception</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Exceptions</value>
+    </caseValues>
+    <fields>
+        <help><!-- The date and time on which the exception was created --></help>
+        <label><!-- Exception Date and Time --></label>
+        <name>Exception_Date_and_Time__c</name>
+    </fields>
+    <fields>
+        <help><!-- The information regarding the exception itself --></help>
+        <label><!-- Exception Details --></label>
+        <name>Exception_Details__c</name>
+    </fields>
+    <fields>
+        <help><!-- The link to the record involved in the exception; if a batch process threw the exception, the link to the first record processed by the batch process --></help>
+        <label><!-- Link to Record --></label>
+        <name>Link_to_Record__c</name>
+    </fields>
+    <fields>
+        <help><!-- The unique record ID of the object record on which the exception was thrown, or, for batch jobs, the first record of the batch in which the exception was thrown --></help>
+        <label><!-- Obj Record Id --></label>
+        <name>Obj_Record_Id__c</name>
+    </fields>
+    <fields>
+        <help><!-- The object tyoe upon which the exception was thrown --></help>
+        <label><!-- Object --></label>
+        <name>Object__c</name>
+    </fields>
+    <fields>
+        <help><!-- The class or flow being executed when the exception was thrown --></help>
+        <label><!-- Operation --></label>
+        <name>Operation__c</name>
+    </fields>
+    <fields>
+        <help><!-- The first and last name of the owner if the owner is a user, and the name of the queue, if the owner is a queue --></help>
+        <label><!-- Owner Name --></label>
+        <name>Owner_Name__c</name>
+    </fields>
+    <fields>
+        <help><!-- The particular process being executed at the time of the exception --></help>
+        <label><!-- Process --></label>
+        <name>Process__c</name>
+    </fields>
+    <startsWith>Vowel</startsWith>
+</CustomObjectTranslation>
